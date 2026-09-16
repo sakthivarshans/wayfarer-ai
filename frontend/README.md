@@ -13,12 +13,18 @@ for the full project overview and `.env.example` for required configuration.
 ## Current pages
 
 - `/login`, `/signup` — email/password auth (Firebase Authentication)
-- `/` — Trip Planner (Home) — protected, form comes in Phase 4
-- `/results/places`, `/results/transport`, `/results/hotels` — protected, tabbed shells; real data comes in Phases 5–6
-- `/itinerary` — protected shell; generation comes in Phase 7
+- `/` — Trip Planner (Home) — protected; creates a trip, then goes to `/trips/:id`
+- `/trips` — My Trips — lists every trip you've planned
+- `/trips/:tripId` — redirects to that trip's Results tab
+- `/trips/:tripId/results/{places,transport,hotels}` — protected, tabbed
+  shells scoped to one trip; real data comes in Phases 5–6
+- `/trips/:tripId/itinerary` — protected shell scoped to one trip;
+  generation comes in Phase 7
+- `/results`, `/itinerary` — convenience redirects to your most recent
+  trip's version of each (or an empty state if you have no trips yet)
 - `/telegram` — Telegram Bot Setup shell; wiring comes in Phase 8
-- `/trips` — My Trips shell; comes alongside trip creation in Phase 4
-- `/settings` — account info + sign out (functional now); more preferences land as later phases need them
+- `/settings` — account info + sign out (functional now); more preferences
+  land as later phases need them
 - `/api/health` — frontend health-check endpoint
 
 Every page except `/login` and `/signup` is behind a client-side auth guard
