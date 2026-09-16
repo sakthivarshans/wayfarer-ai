@@ -7,7 +7,7 @@ what's shipped, what's next, and what to verify.
 |---|---|---|
 | 1 | Repo scaffolding, config, env docs, Firebase setup guide | ✅ Done |
 | 2 | Backend foundation (Express shell, Firebase Admin, auth/error/validation middleware, retry helper) | ✅ Done |
-| 3 | Frontend foundation (Next.js shell, Firebase client, auth context, nav, page shells) | ⬜ Not started |
+| 3 | Frontend foundation (Next.js shell, Firebase client, auth context, nav, page shells) | ✅ Done |
 | 4 | Trips (create/list/fetch + Trip Planner form + My Trips page) | ⬜ Not started |
 | 5 | Places (Geoapify + Overpass/Nominatim fallback) | ⬜ Not started |
 | 6 | Transport & Hotels (deep-link builders) | ⬜ Not started |
@@ -74,3 +74,53 @@ plumbing that Phase 4+ routes will import.
 actually uses `requireAuth`/`validate` (Trips is Phase 4), any service that
 uses `withRetry` (Places/Transport/Hotels/Telegram), Firestore data models,
 frontend Firebase client/auth context (Phase 3).
+
+## Phase 3 — Definition of Done
+
+- [x] `docs/DESIGN.md` — design tokens (colors sampled from the reference
+      image, layout, component patterns) written before any UI was built
+- [x] `tailwind.config.ts` — `ink`/`sky`/`text`/`surface`/`status` color
+      tokens, `rounded-card`, `shadow-card` added to match `docs/DESIGN.md`
+- [x] `frontend/src/config/firebaseClient.ts` — browser-only Firebase client
+      SDK singleton (guards against SSR misuse)
+- [x] `frontend/src/features/auth/AuthContext.tsx` — `useAuth()` hook:
+      `user`, `loading`, `signIn`, `signUp`, `signOutUser`, `getIdToken`
+      (ready for Phase 4 routes to call the backend's `requireAuth`)
+- [x] `/login`, `/signup` — public email/password auth pages
+- [x] `frontend/src/app/(app)/layout.tsx` — client-side auth guard;
+      redirects signed-out users to `/login`
+- [x] `Sidebar`/`Topbar`/`AppShell` — icon-rail nav (Trip Planner, Results,
+      Itinerary, Telegram Bot, My Trips, Settings) matching `docs/DESIGN.md`
+- [x] Page shells for all six nav destinations, plus tabbed
+      `/results/{places,transport,hotels}`, all behind the auth guard
+- [x] `/settings` — genuinely functional (shows signed-in account, sign out),
+      not just a placeholder, since auth context is this phase's own output
+- [x] Old placeholder landing page removed; `/` is now the (protected) Trip
+      Planner home
+- [x] `not-found.tsx` / `error.tsx` / `loading.tsx` restyled onto the new
+      design tokens (previously used a `brand-*` palette that no longer
+      exists)
+- [x] `npm run build` (all 13 routes prerender) and `npm run lint` clean in
+      `frontend/`
+
+**To verify locally:**
+```
+cd frontend
+npm install
+cp .env.example .env.local   # fill in real Firebase web-app config
+npm run build   # next build — all routes compile, no errors
+npm run lint     # next lint — no warnings or errors
+npm run dev      # then visit http://localhost:3000 — redirects to /login
+```
+Create an account at `/signup` (requires a real Firebase project with
+Email/Password auth enabled, per `docs/FIREBASE_SETUP.md`) to see the nav
+shell and page placeholders.
+
+**Deferred to later phases (intentionally not built yet):** any real page
+content behind the shells (Trip Planner form and Trips API are Phase 4;
+Places/Transport/Hotels data are Phases 5–6; Itinerary generation is Phase 7;
+Telegram bot wiring is Phase 8); a server-verified session (current guard is
+client-side only, matching this phase's scope — Phase 4's protected API
+routes are the actual security boundary); no automated frontend test suite
+exists yet (backend has one; frontend didn't have test infra in Phase 1
+either, so this isn't a regression, just a gap worth flagging for Phase 9).
