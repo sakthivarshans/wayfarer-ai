@@ -12,11 +12,20 @@ for the full project overview and `.env.example` for required configuration.
 
 ## Current pages
 
-- `/` — placeholder landing page
+- `/login`, `/signup` — email/password auth (Firebase Authentication)
+- `/` — Trip Planner (Home) — protected, form comes in Phase 4
+- `/results/places`, `/results/transport`, `/results/hotels` — protected, tabbed shells; real data comes in Phases 5–6
+- `/itinerary` — protected shell; generation comes in Phase 7
+- `/telegram` — Telegram Bot Setup shell; wiring comes in Phase 8
+- `/trips` — My Trips shell; comes alongside trip creation in Phase 4
+- `/settings` — account info + sign out (functional now); more preferences land as later phases need them
 - `/api/health` — frontend health-check endpoint
 
-Auth, the trip planner, results tabs, itinerary, and Telegram setup pages are
-added in later phases — see `../PHASES.md`.
+Every page except `/login` and `/signup` is behind a client-side auth guard
+(`src/app/(app)/layout.tsx`) that redirects signed-out users to `/login`.
+
+See `../docs/DESIGN.md` for the UI design tokens (colors, layout, component
+style) used throughout.
 
 ## Deployment (Vercel)
 
