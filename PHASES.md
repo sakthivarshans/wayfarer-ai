@@ -8,7 +8,7 @@ what's shipped, what's next, and what to verify.
 | 1 | Repo scaffolding, config, env docs, Firebase setup guide | ✅ Done |
 | 2 | Backend foundation (Express shell, Firebase Admin, auth/error/validation middleware, retry helper) | ✅ Done |
 | 3 | Frontend foundation (Next.js shell, Firebase client, auth context, nav, page shells) | ✅ Done |
-| 4 | Trips (create/list/fetch + Trip Planner form + My Trips page) | ⬜ Not started |
+| 4 | Trips (create/list/fetch + Trip Planner form + My Trips page) | ✅ Done |
 | 5 | Places (Geoapify + Overpass/Nominatim fallback) | ⬜ Not started |
 | 6 | Transport & Hotels (deep-link builders) | ⬜ Not started |
 | 7 | Itinerary generation | ⬜ Not started |
@@ -124,3 +124,57 @@ client-side only, matching this phase's scope — Phase 4's protected API
 routes are the actual security boundary); no automated frontend test suite
 exists yet (backend has one; frontend didn't have test infra in Phase 1
 either, so this isn't a regression, just a gap worth flagging for Phase 9).
+
+## Phase 4 — Definition of Done
+
+- [x] Backend: `POST /api/trips`, `GET /api/trips`, `GET /api/trips/:id`,
+      all behind `requireAuth`, validated with `createTripBodySchema` /
+      `tripIdParamsSchema`
+- [x] `services/trips.service.ts` — Firestore-backed; lists are sorted
+      in-memory (newest first) rather than via Firestore `orderBy`, so no
+      composite index needs to be created in the Firebase console
+- [x] `getTripById` returns `null` both when a trip doesn't exist and when
+      it belongs to another user — the controller turns either into an
+      identical 404, so trip IDs can't be probed to confirm existence
+- [x] `getRequestUser()` helper added to `middleware/auth.ts` (controllers
+      no longer use a `req.user!` non-null assertion)
+- [x] Backend tests: an in-memory fake Firestore test helper, unit tests for
+      the service, integration tests for the routes (missing/invalid auth,
+      body validation, cross-user ownership isolation) — all through the
+      real Express app + real middleware, only Firestore/Firebase Auth faked
+- [x] Frontend: `src/lib/apiClient.ts` — typed fetch wrapper matching the
+      backend's `{ error: { code, message, details } }` shape
+- [x] `src/features/trips/` — types, API calls, `TripPlannerForm`,
+      `TripCard`, `useTrips` hook, `TripContext`
+- [x] `/` — real Trip Planner form; creates a trip, redirects to `/trips/:id`
+- [x] `/trips` — real My Trips list (loading/empty/error states), no longer
+      a placeholder
+- [x] Routing restructured to be trip-scoped, since "My Trips" only makes
+      sense if Results/Itinerary can show a *specific* trip:
+      `/trips/:tripId/results/{places,transport,hotels}` and
+      `/trips/:tripId/itinerary`, sharing a layout with the trip summary +
+      tab nav
+- [x] Sidebar's `/results` and `/itinerary` links still work: they now
+      smart-redirect to the most recently created trip's version of each,
+      or show an empty state ("plan a trip first") if the user has none
+- [x] `npm run build` (backend + frontend), `npm test` (33/33 backend),
+      `npm run lint` (backend + frontend) all clean
+
+**To verify locally:**
+```
+# backend
+cd backend && npm install && npm run build && npm test && npm run lint
+
+# frontend
+cd frontend && npm install
+cp .env.example .env.local   # fill in real Firebase web-app config
+npm run build && npm run lint
+npm run dev   # sign in, submit the Trip Planner form, see it land in My Trips
+```
+
+**Deferred to later phases (intentionally not built yet):** actual
+places/transport/hotel data and the itinerary generator (Phases 5–7, the
+shells just say so); editing or deleting a trip; pagination on `GET
+/api/trips` (fine at this app's expected scale — a handful of trips per
+user); no automated frontend test suite yet (same gap noted in Phase 3,
+still deferred to Phase 9).
