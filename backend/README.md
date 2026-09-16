@@ -14,9 +14,14 @@ overview and `.env.example` for required configuration.
 ## Current routes
 
 - `GET /api/health` — liveness check, returns `{ status: "ok", timestamp }`
+- `POST /api/trips` — create a trip (auth required)
+- `GET /api/trips` — list the authenticated user's trips, newest first
+- `GET /api/trips/:id` — fetch a trip the authenticated user owns (404 otherwise)
 
-More routes (`/api/trips`, `/api/places`, `/api/telegram`, ...) are added in
-later phases — see `../PHASES.md`.
+All `/api/trips` routes require `Authorization: Bearer <Firebase ID token>`.
+
+More routes (`/api/places`, `/api/telegram`, ...) are added in later phases —
+see `../PHASES.md`.
 
 ## Deployment (Render)
 
