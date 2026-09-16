@@ -1,0 +1,124 @@
+# Wayfarer AI — Design Reference
+
+Derived from a reference dashboard screenshot (call-center analytics UI) the
+user provided for Phase 3. Colors below were sampled directly from the
+reference image's pixels, not eyeballed, so they're accurate to the source.
+This file is the single source of truth for UI tokens — read it before
+building or changing any frontend UI.
+
+## Overall feel
+
+Light, airy, low-contrast dashboard with one saturated brand color (deep
+indigo/violet) used sparingly for the sidebar, active states, and data
+visualizations. Everything else — page background, cards — sits in
+near-white neutrals so the purple accent pops without the UI feeling heavy.
+Corners are consistently rounded (cards, pills, buttons), and category data
+is color-coded using a family of tints from the same purple, plus one
+secondary blue tint for a second data category.
+
+## Color tokens
+
+Add these to `tailwind.config.ts` under `theme.extend.colors`.
+
+| Token | Hex | Sampled from | Usage |
+|---|---|---|---|
+| `ink.950` | `#34256E` | floating side tab | Hover/pressed states, floating action tabs |
+| `ink.900` | `#3B2A82` | sidebar background | Sidebar background, primary buttons |
+| `ink.800` | `#4B3AA0` | *(derived, +1 step lighter)* | Active nav-item highlight background |
+| `ink.700` | `#6954B7` | stat-card accent bar | Left accent bars, secondary buttons, icons on light bg |
+| `ink.600` | `#8170D8` | chart area fill (mid) | Chart fills, mid-emphasis accents |
+| `ink.500` | `#8D87FF` | donut ring | Progress rings, links, focus rings |
+| `ink.300` | `#C5C2FE` | chart area fill (light) | Light chart fills, subtle highlights |
+| `ink.100` | `#E5E4FF` | stat-card #2 accent tint | Tinted card backgrounds, badges (purple category) |
+| `sky.100` | `#E4EEFD` | stat-card #3 accent tint | Tinted card backgrounds, badges (blue category) — second data color family |
+| `text.heading` | `#170B42` | dashboard title (darkest pixel sampled `#0E024C`, lightened for body use) | Page titles, card titles, big stat numbers |
+| `text.body` | `#525266` | *(standard muted-neutral, no legible small text to sample)* | Body copy |
+| `text.muted` | `#9C9CAE` | legend/caption text | Captions, placeholder text, secondary labels |
+| `surface.page` | `#F5F5FA` | page background | `<body>` background |
+| `surface.card` | `#FFFFFF` | card background (sampled ~`#FAFAFA`, rounded to pure white — cards are distinguished by shadow, not fill, in the source) | All card backgrounds |
+| `surface.border` | `#ECEBF3` | *(derived light-neutral)* | Card borders/dividers, input borders |
+| `status.success` | `#5FA83B` | online-status dot | Online indicators, success states |
+| `status.danger` | `#D36063` | notification badge | Error states, notification badges |
+
+## Layout
+
+**Sidebar (icon rail)**
+- Fixed left, width `72px`, full viewport height, background `ink.900`
+- Large rounded corner on the outer bottom-left of the whole app (`24px`) —
+  matches the source image's soft window-corner treatment
+- Logo/mark centered at top, ~`40px`, light/white, `24px` top margin
+- Nav icons stacked vertically below, centered, `~40px` tap targets, `24–28px`
+  gap between them, icon color `ink.100` (inactive) / white (active)
+- Active nav item gets a rounded-square highlight behind the icon in `ink.800`
+- No text labels in the rail — icon-only, matches source
+
+**Topbar**
+- Background = `surface.page` (no visible card/border, sits flush on the page)
+- Height ~`72px`
+- Left: page title, `text.heading`, bold, `20–22px`
+- Right: a row of circular icon buttons (`36px`, light-gray circular bg,
+  `status.danger` badge dot for unread counts) + user avatar + name + role +
+  a small `status.success` presence dot
+- Optional secondary row: a light pill (`surface.border` outline, rounded-full,
+  small muted text) for contextual info like a date/time or filter
+
+**Cards**
+- Background `surface.card`, radius `20px`, soft shadow with a faint purple
+  tint (`shadow: 0 8px 24px -8px rgba(59,42,130,0.10)`)
+- Padding `20–24px`
+- Header row inside every card: title (`text.heading`, semibold, `14–15px`)
+  on the left, an optional dropdown/filter control on the right (rounded-full
+  or rounded-md, light border, small text + chevron)
+
+**Stat cards** (used for headline numbers, e.g. dashboard totals)
+- White card, radius `20px`, a thick (`4–6px`) colored left accent bar
+- Big bold number (`26–28px`, `text.heading`)
+- Label below the number (`14px`, medium weight)
+- Small muted caption below that (`12px`, `text.muted`)
+- Rotate the accent bar color across a row of stat cards: `ink.700`,
+  `ink.100`, `sky.100` — same pattern the source image uses to
+  color-code different metric categories without needing more than two hues
+
+**List/breakdown rows**
+- Pill-shaped row (`rounded-full`), tinted background per category
+  (`ink.100` or `sky.100`), small square/dot indicator on the left
+- Label left-aligned, value + percentage right-aligned
+- No border — the tint alone separates it from the page
+
+**Floating elements**
+- A vertical pill tab fixed to the right edge of the viewport (e.g. a
+  persistent action like "Ask the bot"), `ink.950` background, white
+  vertical text, rounded only on the side facing into the page
+- Small circular floating action buttons (~`40–44px`), `ink.700` background,
+  white icon, soft shadow, bottom-right of the section they act on
+
+## Typography
+
+- Font: system UI sans-serif stack (`Inter` if we add a webfont later, but
+  the default Tailwind sans stack matches the source closely enough — no
+  webfont is required for Phase 3)
+- Page titles: `20–22px`, bold, `text.heading`
+- Card titles: `14–15px`, semibold, `text.heading`
+- Big stat numbers: `26–28px`, bold, `text.heading`
+- Body/labels: `13–14px`, regular, `text.body`
+- Captions/muted: `12px`, regular, `text.muted`
+
+## Data visualization (for later phases: itinerary charts, budget breakdowns)
+
+- Stacked/area charts: layer fills from the `ink` family light→dark
+  (`ink.300` → `ink.600` → `ink.700`), plus `sky.100`'s darker sibling for a
+  4th series if needed. Legend: small filled circles matching each series
+  color, label text in `text.muted`
+- Donut/progress rings: light track in `ink.300`, progress arc in `ink.500`,
+  big bold percentage centered in `text.heading`, a small muted pill caption
+  underneath
+- Tooltips: white rounded card, soft shadow, small colored-bullet rows
+
+## What this means for Wayfarer AI's actual pages
+
+Wayfarer AI's sidebar nav (Phase 3 scope) maps directly onto this icon rail:
+Trip Planner (home), Results, Itinerary, Telegram Bot Setup, My Trips,
+Settings — six icons, same treatment as the source's Home/Contacts/Calls/
+etc. rail. Stat-card and accent-bar treatment gets reused later for
+itinerary/budget summaries (Phase 7) once there's real numeric data to show;
+Phase 3 itself only needs the shell, nav, and empty page cards.
