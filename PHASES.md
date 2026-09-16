@@ -6,7 +6,7 @@ what's shipped, what's next, and what to verify.
 | # | Phase | Status |
 |---|---|---|
 | 1 | Repo scaffolding, config, env docs, Firebase setup guide | ✅ Done |
-| 2 | Backend foundation (Express shell, Firebase Admin, auth/error/validation middleware, retry helper) | ⬜ Not started |
+| 2 | Backend foundation (Express shell, Firebase Admin, auth/error/validation middleware, retry helper) | ✅ Done |
 | 3 | Frontend foundation (Next.js shell, Firebase client, auth context, nav, page shells) | ⬜ Not started |
 | 4 | Trips (create/list/fetch + Trip Planner form + My Trips page) | ⬜ Not started |
 | 5 | Places (Geoapify + Overpass/Nominatim fallback) | ⬜ Not started |
@@ -34,3 +34,43 @@ errors).
 **Deferred to later phases (intentionally not built yet):** Firebase Admin
 init, auth middleware, all real page content, all services/routes beyond
 health.
+
+## Phase 2 — Definition of Done
+
+- [x] `backend/src/config/firebaseAdmin.ts` — singleton Firebase Admin init,
+      exposing `getFirebaseAuth()` and `getFirestoreDb()`; throws a clear
+      error (not a raw SDK crash) if credentials are missing
+- [x] `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY`
+      required in `env.ts` outside `NODE_ENV=test`
+- [x] `backend/src/middleware/auth.ts` — `requireAuth` verifies a Firebase ID
+      token from `Authorization: Bearer <token>`, attaches `req.user`, and
+      never leaks Firebase's internal error details to the client
+- [x] `backend/src/types/express.d.ts` — typed `req.user` augmentation
+- [x] `backend/src/middleware/validate.ts` — generic zod `body`/`params`/`query`
+      validation middleware, reusable by every future route
+- [x] `backend/src/utils/retry.ts` — exponential backoff `withRetry` helper
+      (configurable attempts/delay/predicate), ready for Places/Transport/
+      Hotels/Groq services in later phases
+- [x] Unit tests for all four pieces above, with Firebase mocked where needed
+- [x] Bug fix: `backend/.eslintrc.json` typed-linting `project` pointed at
+      `tsconfig.json`, which excludes `tests/` — added `tsconfig.eslint.json`
+      so `npm run lint` actually covers test files instead of erroring on
+      every one of them
+- [x] `npm run build`, `npm test` (18/18 passing), and `npm run lint` all
+      clean in `backend/`
+
+**To verify locally:**
+```
+cd backend
+npm install
+npm run build   # tsc — no errors
+npm test        # vitest — 5 files / 18 tests passing
+npm run lint    # eslint — no errors or warnings
+```
+No new routes are exposed yet — `requireAuth`/`validate`/`withRetry` are
+plumbing that Phase 4+ routes will import.
+
+**Deferred to later phases (intentionally not built yet):** any route that
+actually uses `requireAuth`/`validate` (Trips is Phase 4), any service that
+uses `withRetry` (Places/Transport/Hotels/Telegram), Firestore data models,
+frontend Firebase client/auth context (Phase 3).
