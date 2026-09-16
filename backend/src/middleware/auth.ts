@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { getFirebaseAuth } from "../config/firebaseAdmin";
 import { ApiError } from "../utils/apiError";
 import { asyncHandler } from "../utils/asyncHandler";
+import type { AuthenticatedUser } from "../types/express";
 
 const BEARER_PREFIX = "Bearer ";
 
@@ -40,3 +41,16 @@ export const requireAuth = asyncHandler(async (req: Request, _res: Response, nex
   req.user = { uid: decoded.uid, email: decoded.email };
   next();
 });
+
+/**
+ * Reads `req.user` for a controller mounted behind `requireAuth`. Throws
+ * instead of using a `req.user!` non-null assertion, so a misconfigured
+ * route (missing `requireAuth`) fails loudly with a 401 rather than a
+ * TypeError.
+ */
+export function getRequestUser(req: Request): AuthenticatedUser {
+  if (!req.user) {
+    throw ApiError.unauthorized();
+  }
+  return req.user;
+}
