@@ -20,6 +20,12 @@ const envSchema = z
     GROQ_API_KEY: z.string().optional(),
     TELEGRAM_WEBHOOK_BASE_URL: z.string().optional(),
     TOKEN_ENCRYPTION_KEY: z.string().optional(),
+
+    // Optional: defaults to OSRM's public demo server (see
+    // services/transport/osrmRoute.provider.ts) when unset. Point this at a
+    // self-hosted OSRM instance if the public demo server's fair-use limits
+    // ever become a problem — it isn't meant for sustained production load.
+    OSRM_BASE_URL: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     if (value.NODE_ENV === "test") {
