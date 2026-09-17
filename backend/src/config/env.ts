@@ -13,8 +13,9 @@ const envSchema = z
     FIREBASE_CLIENT_EMAIL: z.string().optional(),
     FIREBASE_PRIVATE_KEY: z.string().optional(),
 
-    // Still optional at this phase: required once Geoapify, Groq, and Telegram
-    // integrations land in later phases.
+    // Optional by design: when unset, the places service (Phase 5) falls
+    // back to OSM Overpass, which needs no key. Setting it gives richer
+    // Geoapify results as the primary source.
     GEOAPIFY_API_KEY: z.string().optional(),
     GROQ_API_KEY: z.string().optional(),
     TELEGRAM_WEBHOOK_BASE_URL: z.string().optional(),
