@@ -42,6 +42,15 @@ export function createFakeFirestore(): Firestore {
               data: () => found?.data,
             };
           },
+          set: async (data: Record<string, unknown>) => {
+            const docs = docsFor(name);
+            const existing = docs.find((d) => d.id === id);
+            if (existing) {
+              existing.data = data;
+            } else {
+              docs.push({ id, data });
+            }
+          },
         }),
         where: (field: string, op: string, value: unknown) => ({
           get: async () => {
