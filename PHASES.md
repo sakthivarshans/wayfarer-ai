@@ -9,7 +9,7 @@ what's shipped, what's next, and what to verify.
 | 2 | Backend foundation (Express shell, Firebase Admin, auth/error/validation middleware, retry helper) | ✅ Done |
 | 3 | Frontend foundation (Next.js shell, Firebase client, auth context, nav, page shells) | ✅ Done |
 | 4 | Trips (create/list/fetch + Trip Planner form + My Trips page) | ✅ Done |
-| 5 | Places (Geoapify + Overpass/Nominatim fallback) | ⬜ Not started |
+| 5 | Places (Geoapify + Overpass/Nominatim fallback) | ✅ Done |
 | 6 | Transport & Hotels (deep-link builders) | ⬜ Not started |
 | 7 | Itinerary generation | ⬜ Not started |
 | 8 | Telegram bot (connect/webhook/Groq replies) | ⬜ Not started |
@@ -178,3 +178,72 @@ shells just say so); editing or deleting a trip; pagination on `GET
 /api/trips` (fine at this app's expected scale — a handful of trips per
 user); no automated frontend test suite yet (same gap noted in Phase 3,
 still deferred to Phase 9).
+
+## Phase 5 — Definition of Done
+
+- [x] `backend/src/types/place.ts` — typed `Place`/`PlaceCategory`, with
+      `estimatedCost` documented as a heuristic (neither provider exposes
+      real pricing on its free tier), not a live price
+- [x] `services/places/geocode.provider.ts` — OSM Nominatim geocoding
+      (destination string → `{ lat, lng }`), identifying `User-Agent` per
+      Nominatim's usage policy, wrapped in `withRetry`
+- [x] `services/places/geoapifyPlaces.provider.ts` — Geoapify Places API
+      (primary source when `GEOAPIFY_API_KEY` is set), mapped to typed
+      `Place[]`, unnamed features skipped
+- [x] `services/places/overpassPlaces.provider.ts` — OSM Overpass API
+      (fully free, no key), used as the fallback source
+- [x] `services/places/estimateCost.ts` — per-category cost heuristic
+      (`sights`/`nature`/`religion` → free, `museum`/`entertainment` → a
+      rough positive estimate, `other` → `null`/unknown)
+- [x] `services/places/rankPlaces.ts` — ranks cheap-first (treating `null`
+      as free/unknown, never as expensive) and trims to ~3 places/day,
+      capped at 15
+- [x] `services/places.service.ts` — orchestrates geocode → Geoapify (if
+      configured) → Overpass fallback → rank/trim → Firestore cache (new
+      `placeResults` collection, one doc per trip); only throws a 502
+      `ApiError` if *both* providers fail; supports a `forceRefresh` option
+      for future use
+- [x] `GET /api/trips/:id/places` — nested onto the existing `tripsRouter`,
+      reusing `requireAuth` and `tripIdParamsSchema`; 404s identically for a
+      missing trip or one owned by another user, matching Phase 4's
+      ownership-isolation behavior
+- [x] Backend tests: unit tests for the cost heuristic, ranking, and all
+      three providers (mocking `fetch`, including retry-then-succeed and
+      exhausted-retries cases); unit tests for the places service (provider
+      fallback, cache hit/miss, `forceRefresh`, both-providers-fail);
+      integration tests for the route through the real Express app
+      (success, cross-user 404, missing-trip 404, missing auth)
+- [x] `tests/helpers/fakeFirestore.ts` extended with `doc(id).set()` so the
+      places cache can be tested against the same fake used everywhere else
+- [x] Frontend: `src/features/places/` — `Place`/`PlaceCategory` types,
+      typed `getPlaces` API call, `usePlaces` hook (same loading/error
+      pattern as `useTrips`), `PlaceCard` (category badge using the
+      existing `ink.100`/`sky.100` tokens from `docs/DESIGN.md`, cost shown
+      as "Free" / "~N est." / "Cost unknown")
+- [x] `/trips/:tripId/results/places` — real tab: spinner while loading,
+      error card on failure, empty-state card when a destination has no
+      matches, otherwise a responsive grid of `PlaceCard`s
+- [x] `npm run build` (backend + frontend), `npm test` (58/58 backend),
+      `npm run lint` (backend + frontend) all clean
+
+**To verify locally:**
+```
+# backend
+cd backend && npm install && npm run build && npm test && npm run lint
+
+# frontend
+cd frontend && npm install
+cp .env.example .env.local   # fill in real Firebase web-app config + API URL
+npm run build && npm run lint
+npm run dev   # open a trip's Results > Places tab, see real nearby places
+```
+To exercise the Geoapify path specifically, set `GEOAPIFY_API_KEY` in
+`backend/.env`; leave it unset to exercise the Overpass-only path (both are
+covered by the automated tests either way).
+
+**Deferred to later phases (intentionally not built yet):** a "refresh
+places" button in the UI (the service supports `forceRefresh`, just not
+wired to anything yet); transport/hotel data (Phase 6); the itinerary
+generator (Phase 7); a map view of place pins (nice-to-have, not scoped);
+no automated frontend test suite yet (same longstanding gap, still
+deferred to Phase 9).
