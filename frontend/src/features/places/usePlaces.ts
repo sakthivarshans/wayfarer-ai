@@ -1,0 +1,55 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/AuthContext";
+import { ApiClientError } from "@/lib/apiClient";
+import { getPlaces } from "./api";
+import type { Place } from "./types";
+
+interface UsePlacesResult {
+  places: Place[];
+  loading: boolean;
+  error: string | null;
+}
+
+export function usePlaces(tripId: string): UsePlacesResult {
+  const { getIdToken } = useAuth();
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = await getIdToken();
+        if (!token) {
+          throw new ApiClientError(401, "UNAUTHORIZED", "Your session expired. Please sign in again.");
+        }
+        const result = await getPlaces(token, tripId);
+        if (!cancelled) {
+          setPlaces(result);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof ApiClientError ? err.message : "Couldn't load nearby places.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tripId]);
+
+  return { places, loading, error };
+}
