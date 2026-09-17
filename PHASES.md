@@ -10,7 +10,7 @@ what's shipped, what's next, and what to verify.
 | 3 | Frontend foundation (Next.js shell, Firebase client, auth context, nav, page shells) | ✅ Done |
 | 4 | Trips (create/list/fetch + Trip Planner form + My Trips page) | ✅ Done |
 | 5 | Places (Geoapify + Overpass/Nominatim fallback) | ✅ Done |
-| 6 | Transport & Hotels (deep-link builders) | ⬜ Not started |
+| 6 | Transport & Hotels (deep-link builders) | ✅ Done |
 | 7 | Itinerary generation | ⬜ Not started |
 | 8 | Telegram bot (connect/webhook/Groq replies) | ⬜ Not started |
 | 9 | Polish & deployment | ⬜ Not started |
@@ -247,3 +247,89 @@ wired to anything yet); transport/hotel data (Phase 6); the itinerary
 generator (Phase 7); a map view of place pins (nice-to-have, not scoped);
 no automated frontend test suite yet (same longstanding gap, still
 deferred to Phase 9).
+
+## Phase 6 — Definition of Done
+
+This phase deliberately does **not** integrate a live flights/hotels
+pricing API (see the root README: "quick-compare deep links for transport
+and hotels — redirect-only booking, no in-app payments"). There is no
+real free-tier API that returns live flight/train/bus/hotel prices
+without a card or a lengthy approval process, and fabricating price
+numbers would be actively misleading. Instead, this phase builds:
+comparison-ready deep links straight to each provider's own search
+results (where real pricing lives), plus one piece of real, free data —
+an OSRM road-distance/duration estimate — for context.
+
+- [x] `backend/src/types/transport.ts` / `types/hotel.ts` — typed
+      `TransportOption`/`TransportSummary` and `HotelOption`/`HotelSummary`
+- [x] `services/transport/deepLinks.ts` — pure builders for
+      flight (Google Flights), train (Google Maps transit directions), and
+      bus (Rome2Rio, a keyless global aggregator); orders options with the
+      trip's `transportModePreference` first and marks it `recommended`
+      (no reordering for `"any"`)
+- [x] `services/hotels/deepLinks.ts` — pure builders for Booking.com,
+      Google Hotels, and Hostelworld searches, keyed only on destination
+      (trips don't carry travel dates, so dates are picked on the
+      provider's own site)
+- [x] `services/transport/osrmRoute.provider.ts` — real road
+      distance/duration between origin and destination via OSRM's public
+      demo server; explicitly documented as a driving-route estimate for
+      context, not a substitute for real train/bus/flight schedules
+- [x] `services/transport.service.ts` — geocodes origin+destination
+      (reusing Phase 5's Nominatim provider), calls OSRM, builds the deep
+      links, and caches the summary in a new `transportResults` Firestore
+      collection (one doc per trip); OSRM/geocoding failures degrade to
+      `distanceKm`/`drivingDurationMinutes: null` rather than failing the
+      whole request — the deep links never depend on OSRM succeeding
+- [x] `services/hotels.service.ts` — pure computation (per-night budget
+      hint = `budget / days`, plus the deep links); no external call, so
+      no cache needed, unlike places/transport
+- [x] `GET /api/trips/:id/transport` and `GET /api/trips/:id/hotels` —
+      nested onto the existing `tripsRouter`, same auth/ownership/404
+      behavior as Phase 5's places route
+- [x] `OSRM_BASE_URL` documented as an optional env var (defaults to
+      OSRM's public demo server; swappable for a self-hosted instance
+      later if the demo server's fair-use limits bite)
+- [x] Backend tests: unit tests for both deep-link builders (encoding,
+      preference ordering), the OSRM provider (unit conversion, retry,
+      no-route error), and both services (fallback/degrade behavior,
+      Firestore cache hit/miss/forceRefresh for transport); integration
+      tests for both routes through the real Express app (success,
+      cross-user 404, missing auth)
+- [x] Frontend: `src/features/transport/` and `src/features/hotels/` —
+      typed API calls, `useTransport`/`useHotels` hooks (same
+      loading/error pattern as `usePlaces`), `TransportOptionCard` (mode +
+      provider + a "Your preference" badge) and `HotelOptionCard`, each
+      with an "Open" link to the deep link (`target="_blank"`)
+- [x] `/trips/:tripId/results/transport` — real tab: optional
+      distance/duration context line (only shown when OSRM succeeded),
+      then a grid of transport option cards, preferred mode first
+- [x] `/trips/:tripId/results/hotels` — real tab: a per-night budget hint
+      line, then a grid of hotel provider cards
+- [x] `npm run build` (backend + frontend), `npm test` (79/79 backend),
+      `npm run lint` (backend + frontend) all clean
+
+**To verify locally:**
+```
+# backend
+cd backend && npm install && npm run build && npm test && npm run lint
+
+# frontend
+cd frontend && npm install
+cp .env.example .env.local   # fill in real Firebase web-app config + API URL
+npm run build && npm run lint
+npm run dev   # open a trip's Results > Transport and > Hotels tabs
+```
+The distance/duration line on the Transport tab depends on reaching
+OSRM's public demo server from the backend; if it's unreachable the tab
+still renders correctly (just without that line) — this is covered by an
+automated test, not just manual observation.
+
+**Deferred to later phases (intentionally not built yet):** live
+flight/train/bus/hotel pricing (no viable free-tier API exists for this;
+revisit only if/when moving to a paid provider like Amadeus, out of
+scope for this project's zero-cost goal); a "refresh transport" button in
+the UI (the service supports `forceRefresh`, not wired to a control yet);
+the itinerary generator, which will consume these options (Phase 7); no
+automated frontend test suite yet (same longstanding gap, still deferred
+to Phase 9).
