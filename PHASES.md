@@ -12,7 +12,7 @@ what's shipped, what's next, and what to verify.
 | 5 | Places (Geoapify + Overpass/Nominatim fallback) | ✅ Done |
 | 6 | Transport & Hotels (deep-link builders) | ✅ Done |
 | 7 | Itinerary generation | ✅ Done |
-| 8 | Telegram bot (connect/webhook/Groq replies) | ⬜ Not started |
+| 8 | Telegram bot (connect/webhook/Groq replies) | ✅ Done |
 | 9 | Polish & deployment | ⬜ Not started |
 
 ## Phase 1 — Definition of Done
@@ -413,3 +413,107 @@ moving to a paid provider like Amadeus, same call as Phase 6); the
 Telegram bot, which will read this saved itinerary to answer questions
 (Phase 8); no automated frontend test suite yet (same longstanding gap,
 still deferred to Phase 9).
+
+## Phase 8 — Definition of Done
+
+**Data model:** a new `users` Firestore collection, one doc per Firebase
+uid, holding the AES-256-GCM-encrypted bot token, a random per-user
+webhook secret, the connected bot's username, an optional Telegram
+`chatId` (learned the first time the user messages their bot), and a
+connected-at timestamp. Nothing here is ever sent to the frontend as-is —
+the public shape (`connected`, `botUsername`, `connectedAt`) is a
+separate type, and the raw token/secret never leave the backend.
+
+**Auth model for the webhook:** Telegram calls
+`POST /api/telegram/webhook/:userId/:webhookSecret` directly and can't
+send a Firebase bearer token, so this route is deliberately *not* behind
+`requireAuth` — the random `webhookSecret` baked into the registered
+webhook URL is the auth mechanism instead, checked against the stored
+value inside the service. A wrong/unknown pair gets a 404 either way (never
+reveals whether a `userId` exists). The authenticated connect/status
+endpoints live on a new top-level `/api/users` router instead, since
+they're user-scoped settings, not trip-scoped.
+
+- [x] `types/telegram.ts`, `schemas/telegram.schemas.ts` — stored config
+      vs. public status kept as separate types; the webhook body schema is
+      deliberately loose (`.passthrough()`) since Telegram sends several
+      update types we don't care about and a validation failure would just
+      make Telegram retry the webhook forever
+- [x] `utils/tokenCipher.ts` — AES-256-GCM `encryptSecret`/`decryptSecret`
+      keyed off `TOKEN_ENCRYPTION_KEY` (32-byte hex); a missing/wrong-length
+      key or tampered ciphertext throws a clear internal error rather than
+      silently returning garbage
+- [x] `services/telegram/api.provider.ts` — thin Telegram Bot API wrapper
+      (`getMe`, `setWebhook`, `sendMessage`) on `withRetry`, same
+      429/5xx-retry pattern as every other external provider
+- [x] `services/ai/groq.provider.ts` — Groq (OpenAI-compatible) chat
+      completions wrapper; model defaults to `llama-3.3-70b-versatile`
+      (Groq's standard general-purpose production model, free tier) and is
+      overridable via `GROQ_MODEL` in case Groq retires/renames it;
+      `services/ai/buildItineraryPrompt.ts` is a pure, separately-tested
+      function turning a trip + itinerary + question into the actual
+      messages sent, kept apart from the network call on purpose
+- [x] `services/telegram.service.ts` — `connectTelegramBot` (validate via
+      `getMe`, generate a webhook secret, register it with Telegram,
+      encrypt + persist; an invalid token becomes a 400, a Telegram outage
+      becomes a 502, no `TELEGRAM_WEBHOOK_BASE_URL` becomes a 500);
+      `getTelegramStatus`; `handleIncomingWebhook` (verifies the
+      userId/secret pair, ignores non-text updates, looks up the user's
+      most recent trip via the existing `listTripsForUser` and its saved
+      itinerary via Phase 7's `getItineraryForTrip` — never generates one
+      on the bot's behalf, it tells the user to do that in the app first —
+      then answers via Groq and replies through Telegram). Reconnecting
+      (e.g. to fix a mistyped token) fully overwrites the previous config,
+      including dropping any previously-learned `chatId`, since a new
+      connection needs a fresh first message to learn it again
+- [x] Any failure past the auth check (Groq down, Telegram send failing)
+      is caught inside the service and turned into a friendly message sent
+      to the user's chat, then the webhook still returns 200 — so Telegram
+      never retries a webhook call that already "succeeded" from its point
+      of view
+- [x] `POST /api/users/me/telegram`, `GET /api/users/me/telegram`
+      (authenticated) and `POST /api/telegram/webhook/:userId/:webhookSecret`
+      (public) — mounted via two new routers in `routes/index.ts`
+- [x] Backend tests: unit tests for the token cipher, both HTTP providers
+      (success, non-retryable failure, retry-then-succeed), the pure
+      prompt builder, and the full service (connect success/failure paths,
+      status, and every webhook branch: unknown user, wrong secret,
+      non-text update, no trips yet, no itinerary yet, Groq failure
+      fallback, happy path); integration tests for both route groups
+      through the real Express app (connect → status round-trip, token
+      never leaked in the response, validation, missing auth, webhook
+      auth failures, end-to-end text-message handling, confirming the
+      webhook route needs no Authorization header)
+- [x] Frontend: `src/features/telegram/` — status type, typed
+      `getTelegramStatus`/`connectTelegram` API calls, `useTelegramConnection`
+      hook (separate `loading`/`error` for the initial status fetch vs.
+      `connecting`/`connectError` for the connect action)
+- [x] `/telegram` — real page: BotFather setup instructions, a token input
+      + Connect button, a "Connected to @botname" summary once connected,
+      and a reconnect flow that reuses the same form
+- [x] `.env.example` documents the new optional `GROQ_MODEL` override
+- [x] `npm run build` (backend + frontend), `npm test` (137/137 backend),
+      `npm run lint` (backend + frontend) all clean
+
+**To verify locally:**
+```
+# backend
+cd backend && npm install && npm run build && npm test && npm run lint
+
+# frontend
+cd frontend && npm install
+cp .env.example .env.local   # fill in real Firebase web-app config + API URL
+npm run build && npm run lint
+npm run dev   # open /telegram, paste a real BotFather token, click Connect,
+               # then message your bot on Telegram and ask about your trip
+```
+
+**Deferred to later phases (intentionally not built yet):** a disconnect/
+revoke-bot action (reconnecting with a new token already supersedes the
+old webhook registration, so this wasn't scoped — revisit if it turns out
+to matter in practice); proactively messaging the user (e.g. day-of
+reminders) — `chatId` is captured for this but nothing sends unprompted
+messages yet; no automated frontend test suite yet (same longstanding gap,
+now deferred to Phase 9, which is also everything else — error handling
+review, rate-limit/backoff polish, My Trips-list decision, deployment
+verification, and the final README).
