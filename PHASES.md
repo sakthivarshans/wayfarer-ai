@@ -11,7 +11,7 @@ what's shipped, what's next, and what to verify.
 | 4 | Trips (create/list/fetch + Trip Planner form + My Trips page) | ✅ Done |
 | 5 | Places (Geoapify + Overpass/Nominatim fallback) | ✅ Done |
 | 6 | Transport & Hotels (deep-link builders) | ✅ Done |
-| 7 | Itinerary generation | ⬜ Not started |
+| 7 | Itinerary generation | ✅ Done |
 | 8 | Telegram bot (connect/webhook/Groq replies) | ⬜ Not started |
 | 9 | Polish & deployment | ⬜ Not started |
 
@@ -333,3 +333,83 @@ the UI (the service supports `forceRefresh`, not wired to a control yet);
 the itinerary generator, which will consume these options (Phase 7); no
 automated frontend test suite yet (same longstanding gap, still deferred
 to Phase 9).
+
+## Phase 7 — Definition of Done
+
+Neither the Transport nor Hotels tab has a real per-item selection —
+Phase 6 deliberately only builds provider-level deep links (a mode, e.g.
+"Flight" via Google Flights; a provider, e.g. "Booking.com"), never
+priced individual flights or hotels, so there was nothing to add a
+"select" action onto. Rather than inventing priced entities that don't
+exist in this app's data model, the itinerary's "chosen transport" and
+"chosen hotel" are derived deterministically from data that already
+exists: the first option in each summary's existing order (transport
+options are already sorted with the trip's `transportModePreference`
+first; hotels default to the first provider listed, Booking.com). This
+means generating an itinerary needs no new input at all — it's a pure
+function of the trip's existing places/transport/hotels data — so
+"regenerate" is simply calling generate again.
+
+- [x] `backend/src/types/itinerary.ts` — typed `Itinerary` /
+      `ItineraryDay` / `ItineraryActivity` (`arrival` / `checkin` /
+      `place` / `free` / `departure`)
+- [x] `services/itinerary/build.ts` — pure, deterministic builder:
+      `buildDayPlans` opens day 1 with arrival + hotel check-in, closes
+      the last day with departure, and distributes the trip's
+      already-ranked places (Phase 5) round-robin across days starting
+      on day 1; any day with no place landed on it (only possible when
+      there are fewer places than days) gets a "free time" filler
+      instead of being left empty; `chooseTransport`/`chooseHotel` pick
+      the first option from each summary (see rationale above)
+- [x] `services/itinerary.service.ts` — `generateItineraryForTrip` calls
+      the existing Phase 5/6 services (`getPlacesForTrip`,
+      `getTransportForTrip`, `getHotelsForTrip`) in parallel, builds the
+      itinerary, and persists it to a new `itineraries` Firestore
+      collection (one doc per trip), overwriting any previous version;
+      `getItineraryForTrip` only ever reads the cache — it never
+      generates one implicitly
+- [x] `POST /api/trips/:id/itinerary/generate` and
+      `GET /api/trips/:id/itinerary` — nested onto the existing
+      `tripsRouter`, same auth/ownership/404 behavior as Phases 5–6; GET
+      returns a 404 (not an auto-generated itinerary) when nothing has
+      been generated yet, so the frontend knows to show a "Generate"
+      prompt instead of treating it as a failure
+- [x] Backend tests: unit tests for the pure builder (day distribution,
+      round-robin wraparound, free-time filler, single-day trips, chosen
+      transport/hotel), unit tests for the service (orchestration,
+      cache hit, regenerate-overwrites-cache), integration tests for
+      both routes through the real Express app (generate + fetch
+      round-trip, 404 before generation, cross-user 404, missing trip
+      404, missing auth)
+- [x] Frontend: `src/features/itinerary/` — types mirroring the backend
+      shape, typed `getItinerary`/`generateItinerary` API calls,
+      `useItinerary` hook (treats a 404 from GET as "not generated yet,"
+      not an error state, and exposes a separate `generating`/
+      `generateError` pair for the generate action), `ItineraryDayCard`
+      (day timeline with per-activity-type markers), `ItinerarySummaryCard`
+      (chosen transport + hotel with their deep links, shown at the top)
+- [x] `/trips/:tripId/itinerary` — real page: spinner while loading, a
+      "Generate itinerary" prompt when none exists yet, the day-by-day
+      timeline plus a "Regenerate" control once one does
+- [x] `npm run build` (backend + frontend), `npm test` (96/96 backend),
+      `npm run lint` (backend + frontend) all clean
+
+**To verify locally:**
+```
+# backend
+cd backend && npm install && npm run build && npm test && npm run lint
+
+# frontend
+cd frontend && npm install
+cp .env.example .env.local   # fill in real Firebase web-app config + API URL
+npm run build && npm run lint
+npm run dev   # open a trip's Itinerary tab, click "Generate itinerary"
+```
+
+**Deferred to later phases (intentionally not built yet):** a real
+per-item "select this flight/hotel" feature (would require inventing
+priced entities the app's data model doesn't have — revisit only if/when
+moving to a paid provider like Amadeus, same call as Phase 6); the
+Telegram bot, which will read this saved itinerary to answer questions
+(Phase 8); no automated frontend test suite yet (same longstanding gap,
+still deferred to Phase 9).
