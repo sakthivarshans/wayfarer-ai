@@ -18,6 +18,9 @@ const envSchema = z
     // Geoapify results as the primary source.
     GEOAPIFY_API_KEY: z.string().optional(),
     GROQ_API_KEY: z.string().optional(),
+    // Defaults to "llama-3.3-70b-versatile" (see services/ai/groq.provider.ts)
+    // when unset. Override if Groq retires/renames it.
+    GROQ_MODEL: z.string().optional(),
     TELEGRAM_WEBHOOK_BASE_URL: z.string().optional(),
     TOKEN_ENCRYPTION_KEY: z.string().optional(),
 
