@@ -17,8 +17,9 @@ later for production; a single project is fine for a student project).
 ## 3. Enable Firestore
 
 1. **Build → Firestore Database → Create database**.
-2. Start in **production mode** (we'll write real security rules in the
-   Trips phase — production mode just means "deny by default" until then).
+2. Start in **production mode** — this is "deny by default" for direct
+   client access, which is exactly right here (see step 6 for why no
+   custom rules are needed).
 3. Pick a region close to where most users will be.
 
 ## 4. Get the frontend (client) config
@@ -41,11 +42,13 @@ later for production; a single project is fine for a student project).
 3. **Never commit this JSON file or its contents.** Delete the downloaded
    file once you've copied the values into your `.env`.
 
-## 6. Firestore security rules (placeholder for now)
+## 6. Firestore security rules
 
-Real per-user rules (a user can only read/write their own `trips` and
-`itineraries` documents) are written in the Trips phase, once the data
-model's access patterns are finalized. Until then, the console's default
-production-mode rules (deny all client access) are fine — all access in
-this phase goes through the backend using the Admin SDK, which bypasses
-security rules entirely.
+No custom rules needed — and none are coming later. The frontend never
+talks to Firestore directly; it only calls the backend's own API, and the
+backend reads/writes Firestore exclusively through the Admin SDK (via the
+service account from step 5), which bypasses security rules entirely.
+The console's default production-mode rules (deny all client access) are
+correct and final for this architecture — a browser has no way to reach
+Firestore directly, so there's nothing for per-user rules to protect
+against.
