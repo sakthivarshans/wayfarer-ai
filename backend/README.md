@@ -14,14 +14,28 @@ overview and `.env.example` for required configuration.
 ## Current routes
 
 - `GET /api/health` — liveness check, returns `{ status: "ok", timestamp }`
-- `POST /api/trips` — create a trip (auth required)
+
+Trips (all require `Authorization: Bearer <Firebase ID token>`, and every
+`:id` route 404s for a trip the caller doesn't own):
+
+- `POST /api/trips` — create a trip
 - `GET /api/trips` — list the authenticated user's trips, newest first
-- `GET /api/trips/:id` — fetch a trip the authenticated user owns (404 otherwise)
+- `GET /api/trips/:id` — fetch one trip
+- `GET /api/trips/:id/places` — ranked nearby places for the trip
+- `GET /api/trips/:id/transport` — transport option summary + deep links
+- `GET /api/trips/:id/hotels` — hotel option summary + deep links
+- `POST /api/trips/:id/itinerary/generate` — (re)generate the day-by-day itinerary
+- `GET /api/trips/:id/itinerary` — fetch the saved itinerary (404 if none generated yet)
 
-All `/api/trips` routes require `Authorization: Bearer <Firebase ID token>`.
+Telegram (also under auth):
 
-More routes (`/api/places`, `/api/telegram`, ...) are added in later phases —
-see `../PHASES.md`.
+- `POST /api/users/me/telegram` — connect (or reconnect) a Telegram bot by token
+- `GET /api/users/me/telegram` — connection status (never the token itself)
+
+Telegram webhook (public — no Firebase auth; Telegram calls this
+directly, authenticated instead by the per-user secret in the path):
+
+- `POST /api/telegram/webhook/:userId/:webhookSecret`
 
 ## Deployment (Render)
 
@@ -30,5 +44,6 @@ see `../PHASES.md`.
 creates the service. Fill in the env vars marked `sync: false` in the Render
 dashboard (they're documented in `.env.example`).
 
-Telegram webhook setup and the full deployment checklist are finalized in the
-Polish phase (see `../PHASES.md`).
+See the root `README.md`'s **Deployment** section for the full checklist,
+including setting `TELEGRAM_WEBHOOK_BASE_URL` to this service's URL and
+`CORS_ORIGIN` to the deployed frontend's URL.
