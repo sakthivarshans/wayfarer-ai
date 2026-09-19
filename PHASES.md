@@ -13,7 +13,7 @@ what's shipped, what's next, and what to verify.
 | 6 | Transport & Hotels (deep-link builders) | ✅ Done |
 | 7 | Itinerary generation | ✅ Done |
 | 8 | Telegram bot (connect/webhook/Groq replies) | ✅ Done |
-| 9 | Polish & deployment | ⬜ Not started |
+| 9 | Polish & deployment | ✅ Done |
 
 ## Phase 1 — Definition of Done
 
@@ -517,3 +517,90 @@ messages yet; no automated frontend test suite yet (same longstanding gap,
 now deferred to Phase 9, which is also everything else — error handling
 review, rate-limit/backoff polish, My Trips-list decision, deployment
 verification, and the final README).
+
+## Phase 9 — Definition of Done
+
+An audit of every prior phase's deferred items, done before writing any
+code, found most of the original Polish-phase scope was already satisfied
+in practice — the real gaps were narrower than the phase name suggests:
+
+- **Error handling & loading/error states** — already consistent
+  everywhere: one `errorHandler` middleware turns every error into
+  `{ error: { code, message, details? } }`, every route validates input
+  with zod, and every frontend tab already has its own loading spinner +
+  error card (built phase-by-phase, not something Phase 9 needed to add).
+  No changes made here beyond confirming it during the audit.
+- **Rate-limit/backoff on external calls** — already done: `withRetry`
+  (exponential backoff on 429/5xx) is used in *every* provider
+  (Geoapify/Overpass/Nominatim/OSRM/Telegram/Groq) — confirmed via `grep
+  -rL withRetry` across every `*.provider.ts` returning nothing. No
+  changes needed.
+- **"My Trips" + login decision** — already resolved in Phase 2–4: real
+  Firebase Authentication (not local-storage sessions) and a fully
+  functional `/trips` list page. Nothing left to decide or build.
+- **Frontend automated test suite** — the one genuine, substantial gap,
+  flagged as deferred in every phase's DoD since Phase 3. Added:
+  - `vitest` + `jsdom` + `@testing-library/react` +
+    `@testing-library/jest-dom` + `@testing-library/user-event`,
+    `vitest.config.ts` (esbuild's automatic JSX transform instead of
+    `@vitejs/plugin-react`, which pulled in an ESM/CJS version mismatch
+    with this vitest version), `tests/setup.ts` (jest-dom matchers +
+    RTL `cleanup()` between tests, since this repo doesn't use vitest's
+    `globals: true` — matches the backend's explicit-import convention),
+    mirroring the backend's top-level `tests/unit/` layout
+  - `apiClient.test.ts` — success, error-shape parsing, network failure,
+    204 handling, auth header attachment (8 tests)
+  - `TripCard.test.tsx`, `ItineraryDayCard.test.tsx` — presentational
+    component rendering (8 tests)
+  - `useTelegramConnection.test.ts`, `useItinerary.test.ts` — hook state
+    machines with mocked `AuthContext`/API modules, including the
+    404-means-not-generated-yet branch in `useItinerary` (8 tests)
+  - Not an attempt at full coverage of every component — the backend
+    already thoroughly tests all business logic; these validate the
+    client-side glue (fetch/error handling, rendering, hook state) that
+    had zero coverage before
+- **Settings page** — removed a stale "Preferences & saved API keys"
+  placeholder describing scope that doesn't exist in this app (all
+  provider keys are backend env vars; the one user-supplied credential,
+  the Telegram bot token, already has its own `/telegram` page). Replaced
+  with a real "Connections" card linking there. Deleted the now-unused
+  `ComingSoonCard` component.
+- **Deployment finalization** — `backend/render.yaml` was missing the
+  `GROQ_MODEL` env var; added. Root `README.md`'s Deployment section
+  rewritten from "finalized in a later phase" into a concrete, ordered
+  checklist (Firebase → Render → set `TELEGRAM_WEBHOOK_BASE_URL` →
+  Vercel → set `CORS_ORIGIN` → connect a bot), since the two backend env
+  vars each depend on a URL the other deployment step produces. Added a
+  root **Features** section and a **Testing** section covering both
+  suites.
+- **`docs/FIREBASE_SETUP.md`** — corrected a stale forward-reference to
+  writing Firestore security rules "in the Trips phase." That never
+  happened and turns out not to be needed: the frontend never touches
+  Firestore directly (confirmed via `grep -rl firestore frontend/src` —
+  only Firebase *Auth* is used client-side), so the console's default
+  deny-all rules are correct and final for this architecture, not a
+  placeholder.
+- Both READMEs' route/page lists updated to reflect every route/page
+  actually built (they still described Phase 1/4-era state).
+- [x] `npm run build`, `npm test` (3 runs each, no flakiness), and
+      `npm run lint` all clean on **both** apps at the final commit —
+      backend 137/137 tests, frontend 24/24 tests (net new this phase)
+
+**To verify locally:**
+```
+# backend
+cd backend && npm install && npm run build && npm test && npm run lint
+
+# frontend
+cd frontend && npm install
+cp .env.example .env.local   # fill in real Firebase web-app config + API URL
+npm run build && npm test && npm run lint
+```
+
+**Deferred (still, intentionally):** a disconnect/revoke-bot action and
+proactive Telegram messaging (same reasoning as Phase 8); a real
+per-item flight/hotel selection (same reasoning as Phase 7); production
+observability (structured logs already exist via `pino`, but no
+external log aggregation/alerting — reasonable to add only once this
+moves past a student project). Nothing else remains unbuilt against the
+original PRD's redirect-booking, zero-cost scope.
