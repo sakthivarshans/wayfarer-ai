@@ -9,6 +9,7 @@ for the full project overview and `.env.example` for required configuration.
 - `npm run build` — production build
 - `npm run start` — run the production build
 - `npm run lint` — lint the codebase
+- `npm run test` — run the test suite (vitest + React Testing Library)
 
 ## Current pages
 
@@ -17,14 +18,16 @@ for the full project overview and `.env.example` for required configuration.
 - `/trips` — My Trips — lists every trip you've planned
 - `/trips/:tripId` — redirects to that trip's Results tab
 - `/trips/:tripId/results/{places,transport,hotels}` — protected, tabbed
-  shells scoped to one trip; real data comes in Phases 5–6
-- `/trips/:tripId/itinerary` — protected shell scoped to one trip;
-  generation comes in Phase 7
+  results scoped to one trip: ranked nearby places, and quick-compare
+  deep links for transport and hotels
+- `/trips/:tripId/itinerary` — generate/regenerate and view the trip's
+  day-by-day itinerary
 - `/results`, `/itinerary` — convenience redirects to your most recent
   trip's version of each (or an empty state if you have no trips yet)
-- `/telegram` — Telegram Bot Setup shell; wiring comes in Phase 8
-- `/settings` — account info + sign out (functional now); more preferences
-  land as later phases need them
+- `/telegram` — connect your own Telegram bot (via BotFather) to ask it
+  questions about your most recent trip's itinerary
+- `/settings` — account info + sign out, plus a link to manage the
+  Telegram connection
 - `/api/health` — frontend health-check endpoint
 
 Every page except `/login` and `/signup` is behind a client-side auth guard
@@ -37,5 +40,11 @@ style) used throughout.
 
 Import this repo in Vercel, set the **root directory** to `frontend/`, and
 add the environment variables from `.env.example` in the Vercel project
-settings. Vercel auto-detects Next.js — no extra build config needed, but
-`vercel.json` in this folder pins the framework explicitly.
+settings — in particular, `NEXT_PUBLIC_API_BASE_URL` should point at your
+deployed backend's `/api` path. Vercel auto-detects Next.js — no extra
+build config needed, but `vercel.json` in this folder pins the framework
+explicitly.
+
+See the root `README.md`'s **Deployment** section for the full checklist
+(deploy order, and wiring the backend's `CORS_ORIGIN`/
+`TELEGRAM_WEBHOOK_BASE_URL` to match).
