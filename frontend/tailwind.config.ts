@@ -33,12 +33,34 @@ const config: Config = {
           success: "#5FA83B",
           danger: "#D36063",
         },
+        // Warm secondary family — added for the design refresh (see
+        // docs/DESIGN.md "Redesign addendum"). Used for marketing-feeling
+        // moments (auth pages, place-card scrims, empty states) so the app
+        // isn't one flat violet hue everywhere. Never replaces ink as the
+        // primary interactive/brand color.
+        sand: {
+          50: "#FBF6EE",
+          100: "#F5EAD6",
+          300: "#E8CBA0",
+          500: "#D9A567",
+          700: "#B87A3D",
+        },
+        coral: {
+          400: "#E8825F",
+          500: "#DE6A43",
+          600: "#C4522E",
+        },
+      },
+      fontFamily: {
+        display: ["var(--font-fraunces)", "Georgia", "serif"],
+        sans: ["var(--font-general-sans)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         card: "20px",
       },
       boxShadow: {
         card: "0 8px 24px -8px rgba(59, 42, 130, 0.10)",
+        warm: "0 12px 32px -10px rgba(180, 90, 40, 0.22)",
       },
     },
   },
