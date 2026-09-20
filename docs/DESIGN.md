@@ -122,3 +122,59 @@ Settings — six icons, same treatment as the source's Home/Contacts/Calls/
 etc. rail. Stat-card and accent-bar treatment gets reused later for
 itinerary/budget summaries (Phase 7) once there's real numeric data to show;
 Phase 3 itself only needs the shell, nav, and empty page cards.
+
+## Redesign addendum (design refresh, post-Phase 9)
+
+Everything above still governs the sidebar/card/layout mechanics. This
+section adds a visual-identity layer on top — additive, not a replacement.
+
+**Why:** the app functions well but reads as templated/default-AI-output.
+This pass adds typographic personality, a warmer accent family for
+marketing-feeling surfaces, and a real brand mark, without touching any
+business logic, data model, or the `ink` violet scale's role as the
+primary interactive color.
+
+**Typography**
+- Display / headlines / logo wordmark: **Fraunces** (variable, soft+wonk
+  axes) — `font-display` Tailwind utility, CSS var `--font-fraunces`
+- Body / UI: **Plus Jakarta Sans** (variable) — `font-sans` (now the
+  Tailwind default), CSS var `--font-general-sans`
+- Both self-hosted via `next/font/local` from
+  `src/assets/fonts/` (vendored from the google/fonts OFL repo — see that
+  folder's `OFL.txt`) — zero runtime CDN dependency, works offline/on any
+  host.
+- Chose Plus Jakarta Sans over the original General Sans/Onest suggestions
+  specifically because it's self-hostable without a Fontshare account.
+
+**Color — warm secondary family (additive to the existing tokens above)**
+
+| Token | Hex | Usage |
+|---|---|---|
+| `sand.50` | `#FBF6EE` | Warm page backgrounds (auth pages) |
+| `sand.100` | `#F5EAD6` | Warm card tints, place-card scrim gradients |
+| `sand.300` | `#E8CBA0` | Compass mark secondary facet |
+| `sand.500` | `#D9A567` | Warm accents, mascot pendant cord |
+| `sand.700` | `#B87A3D` | Warm text-on-light accents |
+| `coral.400–600` | `#E8825F` / `#DE6A43` / `#C4522E` | Sparing warm CTA/highlight use — mascot beak, celebratory moments |
+
+`ink` remains the primary brand/interactive color (nav, buttons, links,
+focus states) everywhere in the app shell. `sand`/`coral` are reserved for
+auth pages, place-card photo scrims, empty-state illustrations, and the
+mascot — i.e. surfaces closer to "marketing" than "dashboard."
+
+**Logo** — `src/components/ui/Logo.tsx`: `LogoMark` (compass needle split
+into four ink/sand facets around a pivot dot, matches `public/favicon.svg`)
+and `Logo` (mark + Fraunces "Wayfarer" wordmark, with a `light` variant for
+photo/dark backgrounds). Used in the sidebar (mark only) today; auth pages
+and any marketing surface should use the full lockup.
+
+**Photo sourcing (Places tab, itinerary place mentions) — planned, not yet
+built:** Wikipedia's REST API (`/api/rest_v1/page/summary/{title}`),
+keyless, no account required. Chosen over a stock-photo API (Pexels/
+Unsplash) specifically because named landmarks get their actual real
+photo rather than a generic keyword match; places without a Wikipedia
+page fall back to an icon/pattern card rather than a mismatched photo.
+
+**Mascot — planned, not yet built:** a toucan wearing a small compass
+pendant (on the `sand.500` cord), living bottom-corner, persistent,
+dismissible, with a subtle idle animation and contextual tip bubbles.
