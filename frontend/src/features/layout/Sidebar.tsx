@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass } from "lucide-react";
+import { LogoMark } from "@/components/ui/Logo";
 import { isNavItemActive, navItems } from "./nav-items";
 
 export function Sidebar() {
@@ -10,12 +10,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-20 flex w-[72px] flex-col items-center rounded-br-card bg-ink-900 py-6">
-      <Link
-        href="/"
-        aria-label="Wayfarer AI home"
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white"
-      >
-        <Compass className="h-5 w-5" strokeWidth={2} />
+      <Link href="/" aria-label="Wayfarer AI home" className="flex h-10 w-10 items-center justify-center">
+        <LogoMark className="h-9 w-9" />
       </Link>
 
       <nav className="mt-8 flex flex-1 flex-col items-center gap-6">
