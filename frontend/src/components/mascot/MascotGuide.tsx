@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { X, ChevronDown } from "lucide-react";
 import { Toucan } from "./Toucan";
+import { useMascotNudgeState } from "./MascotNudgeContext";
 
 const SEEN_KEY = "wayfarer:mascot-seen-tips";
 
@@ -53,6 +54,7 @@ export function MascotGuide() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [tip, setTip] = useState<string | null>(null);
+  const nudgeState = useMascotNudgeState();
 
   useEffect(() => {
     const key = tipKeyFor(pathname);
@@ -67,10 +69,25 @@ export function MascotGuide() {
     } else {
       setTip(null);
     }
+    // A route change also retires any page-specific nudge from the
+    // previous page (e.g. an empty-state message shouldn't linger after
+    // navigating away).
+    nudgeState?.clearNudge();
     // Re-check whenever the route changes; `collapsed` intentionally excluded
     // so re-expanding doesn't replay an already-seen tip.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
+
+  // A nudge (empty-state hint, generation celebration) takes priority over
+  // the generic first-visit tip while it's active.
+  const message = nudgeState?.nudge ?? tip;
+  const dismissMessage = () => {
+    if (nudgeState?.nudge) {
+      nudgeState.clearNudge();
+    } else {
+      setTip(null);
+    }
+  };
 
   if (collapsed) {
     return (
@@ -87,13 +104,13 @@ export function MascotGuide() {
 
   return (
     <div className="fixed bottom-4 right-4 z-30 flex max-w-[min(280px,calc(100vw-2rem))] flex-col items-end gap-2">
-      {tip && (
+      {message && (
         <div className="animate-tip-in rounded-card rounded-br-md bg-white px-4 py-3 text-sm text-text-body shadow-warm">
           <div className="flex items-start justify-between gap-3">
-            <p>{tip}</p>
+            <p>{message}</p>
             <button
               type="button"
-              onClick={() => setTip(null)}
+              onClick={dismissMessage}
               aria-label="Dismiss tip"
               className="mt-0.5 shrink-0 text-text-muted hover:text-text-body"
             >
