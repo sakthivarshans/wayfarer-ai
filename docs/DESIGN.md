@@ -216,3 +216,31 @@ search sheet into a login/signup form. Details:
   decoration) — with the full `Logo` lockup, `font-display` (Fraunces)
   heading, and a warm ink→sand gradient scrim over the video for text
   legibility.
+
+**Place cards + photo sourcing — built.** `features/places/PlacePhoto.tsx`
++ `usePlacePhoto.ts`, adapting the "Columbus" reference's tilted-photo
+language to real-time, per-trip data:
+- **Photo source**: Wikipedia's public search+pageimages API
+  (`en.wikipedia.org/w/api.php`, `origin=*` for CORS) — one request per
+  unique place name, module-level cached for the session. No key, no
+  account, no backend proxy needed (Wikipedia's CORS headers allow direct
+  client-side calls). Chosen over Pexels/Unsplash specifically because the
+  user doesn't have a stock-photo account, and named landmarks get their
+  actual real photo rather than a generic keyword match.
+- **Fallback**: places with no reasonable Wikipedia match (small cafés,
+  minor parks) render a category-icon pattern card
+  (`Landmark`/`Trees`/`Church`/`Building2`/`Ticket`/`Sparkles` on a
+  sand gradient) instead of a mismatched stock photo, or a broken image.
+- **Visual treatment**: pin icon + name overlaid on a gradient scrim at
+  the photo's bottom, `rounded-card` + `shadow-card`, with a deterministic
+  (not random, to avoid layout shift) subtle tilt on roughly one in three
+  cards — the reference image's "one polaroid among flat cards" accent,
+  adapted so a dynamic grid doesn't feel chaotic.
+- **Two contexts**: full treatment (photo + overlay caption) on the Places
+  results grid; a compact `showCaption={false}` thumbnail (no overlay text,
+  smaller icon) next to each place mention inside `ItineraryDayCard` rows,
+  where the name is already shown as the row label.
+- `Card` gained a `padded` prop (default `true`) so photo cards can bleed
+  their image to the card edge without fighting the base `p-6` via
+  className-order tricks — every other existing `<Card>` usage is
+  unaffected (defaults unchanged).
