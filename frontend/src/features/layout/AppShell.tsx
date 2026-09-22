@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { MascotGuide } from "@/components/mascot/MascotGuide";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Topbar />
         <main className="px-8 pb-10">{children}</main>
       </div>
+      <MascotGuide />
     </div>
   );
 }
