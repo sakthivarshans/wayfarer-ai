@@ -278,3 +278,14 @@ rest in the old style":
   brief's "restrained motion... a few signature moments instead of
   uniform flatness," Fraunces is reserved for primary page/section
   headings, not every small label.
+
+**Settings + Telegram Bot Setup pages — built.** Brought these two up to
+the same visual language as Transport/Hotels/Trips, without touching
+`CardHeader` itself (still used elsewhere as a plain small-label
+component): each page now uses a local `SectionHeading`-style pattern —
+an icon (`User`/`Send`) in a `sand.100` circle next to a `font-display`
+heading, matching `TransportOptionCard`/`HotelOptionCard`. The connected-
+bot confirmation card on the Telegram page picks up a `CircleCheck` icon
+and a `status.success` left border for a small moment of positive
+feedback. No behavior, copy, or data-fetching logic changed on either
+page — purely the heading/icon treatment.
