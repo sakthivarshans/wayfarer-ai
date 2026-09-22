@@ -12,7 +12,7 @@ export function TripCard({ trip }: { trip: Trip }) {
   return (
     <Link href={`/trips/${trip.id}`}>
       <Card className="border-l-4 border-ink-700 transition-shadow hover:shadow-lg">
-        <p className="text-base font-semibold text-text-heading">
+        <p className="font-display text-lg font-medium text-text-heading">
           {trip.origin} <span className="text-text-muted">→</span> {trip.destination}
         </p>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-text-body">
