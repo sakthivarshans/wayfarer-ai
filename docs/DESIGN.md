@@ -244,3 +244,37 @@ language to real-time, per-trip data:
   their image to the card edge without fighting the base `p-6` via
   className-order tricks — every other existing `<Card>` usage is
   unaffected (defaults unchanged).
+
+**Empty/loading-state mascot nudges — built.** `MascotNudgeContext.tsx`
+adds a small provider (`MascotNudgeProvider`, wrapping `AppShell`'s
+children + `MascotGuide`) exposing `useMascotNudge().sendNudge(message)`.
+This lets a page trigger a one-off mascot message — taking priority over
+the generic first-visit tip — without `MascotGuide` needing to know about
+each page's data-fetching state itself. A route change always clears any
+active nudge. Wired into the three moments named in the original brief:
+- **Empty states**: Places results (no matches) and My Trips (no trips
+  yet) nudge on the existing empty-state render branch — no change to
+  either page's loading/error state machine, purely an added effect.
+- **Celebration**: Itinerary generation wraps `generate()` in a
+  `handleGenerate()` that fires a nudge after it resolves, for both the
+  first "Generate itinerary" and later "Regenerate" actions.
+
+**Consistency pass over the remaining pages — built.** Closing the gap so
+every page reads as one product rather than "5 redesigned pages + the
+rest in the old style":
+- `Topbar`'s page-title `<h1>` (rendered on every authenticated page) now
+  uses `font-display` — the single highest-leverage typography change,
+  since it's shared across the whole app shell.
+- `TransportOptionCard` / `HotelOptionCard`: added a mode icon
+  (`Plane`/`TrainFront`/`Bus`/`Hotel`) in a `sand.100` circle, and
+  `font-display` for the option's heading. No price/duration display was
+  added — the `TransportOption`/`HotelOption` types don't carry that data
+  yet, and adding it would mean a backend/schema change, out of scope here.
+- `TripCard`'s origin → destination line and the "No trips yet" / "No
+  places found" / "Your day-by-day plan" empty-state headings moved to
+  `font-display`, matching the auth pages' heading treatment.
+- Deliberately left as-is: `CardHeader` section labels (e.g. "Account",
+  "Plan a trip") and the Settings page's utility content — per the
+  brief's "restrained motion... a few signature moments instead of
+  uniform flatness," Fraunces is reserved for primary page/section
+  headings, not every small label.
