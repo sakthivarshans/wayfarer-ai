@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/Card";
+import { PlacePhoto } from "@/features/places/PlacePhoto";
 import type { ItineraryActivity, ItineraryDay } from "./types";
 
 // Small dot color per activity type, reusing DESIGN.md's ink/sky tints
@@ -24,6 +25,17 @@ function ActivityRow({ activity }: { activity: ItineraryActivity }) {
   return (
     <li className="flex items-start gap-3">
       <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${ACTIVITY_MARKER_CLASSES[activity.type]}`} />
+      {activity.type === "place" && activity.place && (
+        <div className="w-14 shrink-0">
+          <PlacePhoto
+            placeId={activity.place.id}
+            name={activity.place.name}
+            category={activity.place.category}
+            showCaption={false}
+            className="!rounded-lg"
+          />
+        </div>
+      )}
       <div>
         <p className="text-sm font-medium text-text-heading">{activity.label}</p>
         {activity.type === "place" && activity.place?.description && (
