@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/Card";
 import { PLACE_CATEGORY_LABELS, type Place } from "./types";
+import { PlacePhoto } from "./PlacePhoto";
 
 // Alternate the two badge tints DESIGN.md defines (`ink.100` / `sky.100`)
 // across categories, rather than introducing new colors.
@@ -24,17 +25,20 @@ function formatCost(estimatedCost: number | null): string {
 
 export function PlaceCard({ place }: { place: Place }) {
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="text-sm font-semibold text-text-heading">{place.name}</h3>
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${CATEGORY_BADGE_CLASSES[place.category]}`}
-        >
-          {PLACE_CATEGORY_LABELS[place.category]}
-        </span>
+    <Card padded={false} className="overflow-hidden">
+      <PlacePhoto placeId={place.id} name={place.name} category={place.category} />
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-sm font-semibold text-text-heading">{place.name}</h3>
+          <span
+            className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${CATEGORY_BADGE_CLASSES[place.category]}`}
+          >
+            {PLACE_CATEGORY_LABELS[place.category]}
+          </span>
+        </div>
+        {place.description && <p className="mt-2 text-sm text-text-body">{place.description}</p>}
+        <p className="mt-3 text-xs font-medium text-text-muted">{formatCost(place.estimatedCost)}</p>
       </div>
-      {place.description && <p className="mt-2 text-sm text-text-body">{place.description}</p>}
-      <p className="mt-3 text-xs font-medium text-text-muted">{formatCost(place.estimatedCost)}</p>
     </Card>
   );
 }
