@@ -5,10 +5,17 @@ import { Card } from "@/components/ui/Card";
 import { ItineraryDayCard } from "@/features/itinerary/ItineraryDayCard";
 import { ItinerarySummaryCard } from "@/features/itinerary/ItinerarySummaryCard";
 import { useItinerary } from "@/features/itinerary/useItinerary";
+import { useMascotNudge } from "@/components/mascot/MascotNudgeContext";
 
 export default function TripItineraryPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const { itinerary, loading, error, generating, generateError, generate } = useItinerary(tripId);
+  const { sendNudge } = useMascotNudge();
+
+  async function handleGenerate() {
+    await generate();
+    sendNudge("Your itinerary is ready! Have a look through each day below. 🎉");
+  }
 
   if (loading) {
     return (
@@ -29,14 +36,14 @@ export default function TripItineraryPage() {
   if (!itinerary) {
     return (
       <Card>
-        <h2 className="text-base font-semibold text-text-heading">Your day-by-day plan</h2>
+        <h2 className="font-display text-xl font-medium text-text-heading">Your day-by-day plan</h2>
         <p className="mt-2 max-w-md text-sm text-text-body">
           Generate an itinerary that combines your nearby places, transport, and hotel into a day-by-day plan.
         </p>
         {generateError && <p className="mt-3 text-sm text-status-danger">{generateError}</p>}
         <button
           type="button"
-          onClick={() => void generate()}
+          onClick={() => void handleGenerate()}
           disabled={generating}
           className="mt-4 inline-flex items-center gap-2 rounded-full bg-ink-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-ink-950 disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -59,7 +66,7 @@ export default function TripItineraryPage() {
         </p>
         <button
           type="button"
-          onClick={() => void generate()}
+          onClick={() => void handleGenerate()}
           disabled={generating}
           className="inline-flex items-center gap-2 rounded-full border border-surface-border px-4 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-100 disabled:cursor-not-allowed disabled:opacity-60"
         >
