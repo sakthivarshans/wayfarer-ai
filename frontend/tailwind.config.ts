@@ -62,6 +62,21 @@ const config: Config = {
         card: "0 8px 24px -8px rgba(59, 42, 130, 0.10)",
         warm: "0 12px 32px -10px rgba(180, 90, 40, 0.22)",
       },
+      keyframes: {
+        // Mascot idle animation — a subtle breathing bob, not a bounce.
+        "mascot-idle": {
+          "0%, 100%": { transform: "translateY(0) rotate(0deg)" },
+          "50%": { transform: "translateY(-4px) rotate(-1.5deg)" },
+        },
+        "tip-in": {
+          "0%": { opacity: "0", transform: "translateY(6px) scale(0.97)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+      },
+      animation: {
+        "mascot-idle": "mascot-idle 3.2s ease-in-out infinite",
+        "tip-in": "tip-in 0.18s ease-out",
+      },
     },
   },
   plugins: [],
