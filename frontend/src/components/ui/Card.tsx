@@ -1,8 +1,20 @@
 import type { ReactNode } from "react";
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Card({
+  children,
+  className = "",
+  padded = true,
+}: {
+  children: ReactNode;
+  className?: string;
+  /** Set false for cards that manage their own inner spacing (e.g. a
+   * photo card that needs the image to bleed to the card's edges). */
+  padded?: boolean;
+}) {
   return (
-    <div className={`rounded-card bg-surface-card p-6 shadow-card ${className}`}>{children}</div>
+    <div className={`rounded-card bg-surface-card shadow-card ${padded ? "p-6" : ""} ${className}`}>
+      {children}
+    </div>
   );
 }
 
