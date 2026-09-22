@@ -175,9 +175,27 @@ Unsplash) specifically because named landmarks get their actual real
 photo rather than a generic keyword match; places without a Wikipedia
 page fall back to an icon/pattern card rather than a mismatched photo.
 
-**Mascot — planned, not yet built:** a toucan wearing a small compass
-pendant (on the `sand.500` cord), living bottom-corner, persistent,
-dismissible, with a subtle idle animation and contextual tip bubbles.
+**Mascot — built.** `components/mascot/Toucan.tsx` (static SVG illustration
+— ink body, coral beak/feet, compass pendant on a sand cord, matching
+`LogoMark`'s facet palette) + `MascotGuide.tsx` (the interactive wrapper).
+Mounted once in `AppShell`, so it's genuinely persistent across client-side
+navigation (its collapsed/expanded React state survives route changes,
+since `AppShell` isn't remounted between pages in the `(app)` layout).
+Details:
+- **Idle animation**: `animate-mascot-idle` (custom Tailwind keyframe — a
+  3.2s ease-in-out bob + slight rotation, not a generic bounce), disabled
+  via `motion-reduce:animate-none`.
+- **Contextual tips**: one line per top-level route (`TIPS` map keyed by
+  path prefix), shown once per page via a `localStorage` "seen" set
+  (`wayfarer:mascot-seen-tips`) — reappears harmlessly if storage is
+  unavailable (private browsing etc.), never blocks rendering.
+- **Collapsible/dismissible**: a chevron collapses it to a small idle-
+  animated icon button; the tip bubble has its own dismiss (×) independent
+  of collapsing the mascot itself. Fixed `bottom-4 right-4`, capped at
+  `min(280px, 100vw − 2rem)` so it never overflows on narrow mobile
+  viewports or blocks page content.
+- No backend changes — purely a frontend/localStorage feature, per the
+  redesign's "no schema changes" constraint.
 
 **Auth pages (login/signup) — built.** `features/auth/AuthBackdrop.tsx` +
 `AuthLayout.tsx`: full-bleed looping video background, riffing on the
