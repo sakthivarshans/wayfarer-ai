@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { CircleCheck, Send } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { useTelegramConnection } from "@/features/telegram/useTelegramConnection";
 
@@ -22,19 +23,29 @@ export default function TelegramBotPage() {
   return (
     <div className="space-y-4 pt-2">
       {status?.connected && (
-        <Card>
-          <p className="text-sm font-semibold text-text-heading">Connected to @{status.botUsername}</p>
-          <p className="mt-1 text-sm text-text-body">
-            Message your bot on Telegram any time to ask about your most recent trip&apos;s itinerary.
-          </p>
+        <Card className="border-l-4 border-status-success">
+          <div className="flex items-start gap-3">
+            <CircleCheck className="mt-0.5 h-5 w-5 shrink-0 text-status-success" strokeWidth={2} />
+            <div>
+              <p className="text-sm font-semibold text-text-heading">Connected to @{status.botUsername}</p>
+              <p className="mt-1 text-sm text-text-body">
+                Message your bot on Telegram any time to ask about your most recent trip&apos;s itinerary.
+              </p>
+            </div>
+          </div>
         </Card>
       )}
 
       <Card>
-        <h2 className="text-base font-semibold text-text-heading">
-          {status?.connected ? "Reconnect a bot" : "Connect your Telegram bot"}
-        </h2>
-        <ol className="mt-2 max-w-md list-decimal space-y-1 pl-4 text-sm text-text-body">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sand-100 text-sand-700">
+            <Send className="h-5 w-5" strokeWidth={2} />
+          </div>
+          <h2 className="font-display text-lg font-medium text-text-heading">
+            {status?.connected ? "Reconnect a bot" : "Connect your Telegram bot"}
+          </h2>
+        </div>
+        <ol className="mt-4 max-w-md list-decimal space-y-1 pl-4 text-sm text-text-body">
           <li>
             Open Telegram and message{" "}
             <a
