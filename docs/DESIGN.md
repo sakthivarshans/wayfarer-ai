@@ -178,3 +178,23 @@ page fall back to an icon/pattern card rather than a mismatched photo.
 **Mascot — planned, not yet built:** a toucan wearing a small compass
 pendant (on the `sand.500` cord), living bottom-corner, persistent,
 dismissible, with a subtle idle animation and contextual tip bubbles.
+
+**Auth pages (login/signup) — built.** `features/auth/AuthBackdrop.tsx` +
+`AuthLayout.tsx`: full-bleed looping video background, riffing on the
+mobile destination-search reference's floating white card, adapted from a
+search sheet into a login/signup form. Details:
+- Video: Mixkit "Palm tree on a sunny day" (11s, 720p, 3.68MB,
+  `assets.mixkit.co/videos/4645/4645-720.mp4`) — free for commercial use
+  under the Mixkit Stock Video Free License, no attribution or account
+  required. Muted, looped, `playsInline`, with the same still frame used
+  as both `poster` and an always-rendered base `<img>` layer.
+- `prefers-reduced-motion`: the `<video>` element is hidden via Tailwind's
+  `motion-reduce:hidden`, so reduced-motion users see only the static
+  poster frame underneath — never autoplaying motion.
+- Only mounted on `/login` and `/signup` (not app-wide), per the
+  performance constraint in the original brief.
+- Card: `bg-white/90 backdrop-blur-md` — the "glassmorphism 2.0" note from
+  the brief (translucency used for hierarchy against the photo, not
+  decoration) — with the full `Logo` lockup, `font-display` (Fraunces)
+  heading, and a warm ink→sand gradient scrim over the video for text
+  legibility.
