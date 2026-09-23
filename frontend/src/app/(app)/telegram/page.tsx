@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { CircleCheck, Send } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { PageLoading } from "@/components/ui/PageLoading";
 import { useTelegramConnection } from "@/features/telegram/useTelegramConnection";
 
 export default function TelegramBotPage() {
@@ -68,7 +69,7 @@ export default function TelegramBotPage() {
 
         {loading ? (
           <div className="mt-4 flex justify-center">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-ink-500 border-t-transparent" />
+            <PageLoading />
           </div>
         ) : error ? (
           <p className="mt-4 text-sm text-status-danger">{error}</p>
