@@ -72,6 +72,13 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(6px) scale(0.97)" },
           "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
         },
+        // Loading-state pulse for the illustrated logo mark — a rotating
+        // spin doesn't read well on a character illustration the way it
+        // did on the old abstract compass-needle SVG.
+        "logo-pulse": {
+          "0%, 100%": { transform: "scale(1)", opacity: "1" },
+          "50%": { transform: "scale(1.06)", opacity: "0.85" },
+        },
       },
       animation: {
         "mascot-idle": "mascot-idle 3.2s ease-in-out infinite",
