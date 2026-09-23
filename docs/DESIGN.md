@@ -300,3 +300,44 @@ Trips, Results/Itinerary redirect pages, and the Telegram connection
 check. Left as plain small spinners: the `h-3.5 w-3.5` spinners inside
 the Generate/Regenerate itinerary buttons — a full logo mark reads as too
 heavy at button scale.
+
+## Real logo integration (replaces the placeholder compass mark)
+
+The user-supplied artwork — an illustrated toucan wearing a compass
+pendant, backpack, and standing on a suitcase in front of a globe, on a
+purple gradient rounded-square badge — replaces every placeholder built
+during the earlier design-refresh passes:
+
+- **Source processing**: cropped to its transparent-alpha bounding box
+  (the source PNG had extra canvas padding), squared, then exported at a
+  few purpose-specific sizes rather than shipping one large master
+  everywhere:
+  - `public/brand/toucan-mark.png` (160×160, ~46KB) — the one asset used
+    throughout the running app (sidebar mark, auth-page logo lockup,
+    branded loading state, and the corner mascot). One fetch, browser-
+    cached across every page that references it.
+  - `public/favicon-32.png` / `favicon-16.png`, `public/apple-touch-icon.png`
+    (180×180), `public/icon-192.png` / `icon-512.png` (for `manifest.json`).
+- **`LogoMark`/`Logo`** (`components/ui/Logo.tsx`): now render the artwork
+  directly via `<img>` instead of the earlier hand-built SVG compass — a
+  raster asset, so it can't be recolored per-context; the badge's own
+  purple gradient is used as-is everywhere.
+- **`Toucan`** (`components/mascot/Toucan.tsx`): now the *same* artwork
+  instead of a separate hand-drawn SVG, so the brand mark and the
+  persistent corner guide are visibly one character. The idle-bob
+  animation (`animate-mascot-idle`) still applies as a transform on the
+  `<img>`, unchanged.
+- **Loading animation changed**: the old abstract compass-needle SVG
+  rotated continuously for `PageLoading`; that reads oddly on a character
+  illustration, so `LogoMark`'s `animated` prop now applies a gentle
+  `logo-pulse` (scale 1→1.06, opacity 1→0.85, 1.6s) instead of a spin —
+  new Tailwind keyframe, `motion-reduce:animate-none` guarded. Also added
+  `role="status" aria-live="polite"` + a visually-hidden "Loading" label
+  to `PageLoading` for screen readers, since the animation itself carries
+  no accessible name.
+- **Sidebar**: the link's hit-area/mark size bumped slightly (from the
+  h-9/h-10 pairing used for the old abstract mark to h-10/h-11) since the
+  new artwork already includes its own background padding baked in.
+- **`manifest.json`**: `theme_color` updated to the brand `ink-900` hex
+  (`#3B2A82`, was a leftover sky-blue default) and real `icons` entries
+  added (was an empty array).
