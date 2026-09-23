@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
+import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
 import { PlaceCard } from "@/features/places/PlaceCard";
 import { usePlaces } from "@/features/places/usePlaces";
@@ -24,7 +25,7 @@ export default function TripPlacesResultsPage() {
   if (loading) {
     return (
       <div className="flex justify-center pt-10">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-500 border-t-transparent" />
+        <PageLoading />
       </div>
     );
   }
