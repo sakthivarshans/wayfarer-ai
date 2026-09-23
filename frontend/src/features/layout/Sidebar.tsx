@@ -10,8 +10,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-20 flex w-[72px] flex-col items-center rounded-br-card bg-ink-900 py-6">
-      <Link href="/" aria-label="Wayfarer AI home" className="flex h-10 w-10 items-center justify-center">
-        <LogoMark className="h-9 w-9" />
+      <Link href="/" aria-label="Wayfarer AI home" className="flex h-11 w-11 items-center justify-center">
+        <LogoMark className="h-10 w-10" />
       </Link>
 
       <nav className="mt-8 flex flex-1 flex-col items-center gap-6">
