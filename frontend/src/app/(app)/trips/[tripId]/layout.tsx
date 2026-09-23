@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
 import { TripProvider, useTrip } from "@/features/trips/TripContext";
 import { TRANSPORT_MODE_LABELS } from "@/features/trips/types";
@@ -19,7 +20,7 @@ function TripShell({ tripId, children }: { tripId: string; children: ReactNode }
   if (loading) {
     return (
       <div className="flex pt-10">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-500 border-t-transparent" />
+        <PageLoading />
       </div>
     );
   }
