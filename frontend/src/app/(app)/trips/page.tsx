@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
 import { TripCard } from "@/features/trips/TripCard";
 import { useTrips } from "@/features/trips/useTrips";
@@ -21,7 +22,7 @@ export default function MyTripsPage() {
   if (loading) {
     return (
       <div className="flex justify-center pt-10">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-500 border-t-transparent" />
+        <PageLoading />
       </div>
     );
   }
