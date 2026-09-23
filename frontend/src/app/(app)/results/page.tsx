@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
 import { useTrips } from "@/features/trips/useTrips";
 
@@ -20,7 +21,7 @@ export default function ResultsRedirectPage() {
   if (loading || (!error && trips.length > 0)) {
     return (
       <div className="flex justify-center pt-10">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-500 border-t-transparent" />
+        <PageLoading />
       </div>
     );
   }
