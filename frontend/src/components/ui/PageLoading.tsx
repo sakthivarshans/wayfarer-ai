@@ -7,8 +7,9 @@ import { LogoMark } from "./Logo";
  */
 export function PageLoading({ label }: { label?: string }) {
   return (
-    <div className="flex flex-col items-center gap-3">
-      <LogoMark className="h-10 w-10" animated />
+    <div className="flex flex-col items-center gap-3" role="status" aria-live="polite">
+      <LogoMark className="h-12 w-12" animated />
+      <span className="sr-only">Loading</span>
       {label && <p className="text-sm text-text-muted">{label}</p>}
     </div>
   );
