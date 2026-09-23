@@ -289,3 +289,14 @@ bot confirmation card on the Telegram page picks up a `CircleCheck` icon
 and a `status.success` left border for a small moment of positive
 feedback. No behavior, copy, or data-fetching logic changed on either
 page — purely the heading/icon treatment.
+
+**Branded loading state — built.** `components/ui/PageLoading.tsx` uses
+`LogoMark`'s `animated` prop (spin sped up from the decorative 8s to a
+1.4s loading-appropriate rate, `motion-reduce:animate-none` guarded)
+in place of the generic border-spinner ring, everywhere a full page or
+tab is waiting on data: the root `loading.tsx`, the authenticated-layout
+auth check, every Results tab (Places/Transport/Hotels), Itinerary, My
+Trips, Results/Itinerary redirect pages, and the Telegram connection
+check. Left as plain small spinners: the `h-3.5 w-3.5` spinners inside
+the Generate/Regenerate itinerary buttons — a full logo mark reads as too
+heavy at button scale.
