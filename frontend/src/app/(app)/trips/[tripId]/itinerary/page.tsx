@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { ItineraryDayCard } from "@/features/itinerary/ItineraryDayCard";
 import { ItinerarySummaryCard } from "@/features/itinerary/ItinerarySummaryCard";
 import { useItinerary } from "@/features/itinerary/useItinerary";
@@ -27,11 +28,7 @@ export default function TripItineraryPage() {
   }
 
   if (error) {
-    return (
-      <Card>
-        <p className="text-sm text-status-danger">{error}</p>
-      </Card>
-    );
+    return <ErrorState message={error} />;
   }
 
   if (!itinerary) {
