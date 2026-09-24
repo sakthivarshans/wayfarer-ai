@@ -70,9 +70,11 @@ export function PlacePhoto({
       )}
 
       {!loading && !photoUrl && (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-sand-100 to-sand-300 text-ink-700">
-          <Icon className={showCaption ? "h-8 w-8" : "h-4 w-4"} strokeWidth={1.5} />
-          {showCaption && <p className="px-3 text-center font-display text-sm font-medium">{name}</p>}
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-sand-100 to-sand-300">
+          <Icon className={showCaption ? "h-8 w-8 text-ink-700" : "h-4 w-4 text-ink-700"} strokeWidth={1.5} />
+          {showCaption && (
+            <p className="px-3 text-center font-display text-sm font-medium text-text-heading">{name}</p>
+          )}
         </div>
       )}
     </div>
