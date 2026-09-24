@@ -341,3 +341,20 @@ during the earlier design-refresh passes:
 - **`manifest.json`**: `theme_color` updated to the brand `ink-900` hex
   (`#3B2A82`, was a leftover sky-blue default) and real `icons` entries
   added (was an empty array).
+
+## Trip navigation consistency pass
+
+Closed a remaining gap: the trip-summary card and both tab bars a user
+sees on every Results/Itinerary page were still in the pre-redesign plain
+style.
+- Trip-summary card's origin → destination line moved to `font-display`,
+  matching `TripCard`'s treatment on the My Trips list.
+- Both pill tab bars (`Results`/`Itinerary` in the trip layout, and
+  `Places`/`Transport`/`Hotels` in the results layout) gained a small
+  leading icon per tab (`Compass`/`CalendarDays`, `MapPin`/`Plane`/`Hotel`),
+  matching the icon-circle language already established on
+  `TransportOptionCard`/`HotelOptionCard`/Settings. No behavior change —
+  same routes, same active-state logic.
+- `TripPlannerForm` reviewed and left as-is: its input styling already
+  matches the pattern used on the Telegram form (same `inputClass`), so
+  no changes were needed there.
