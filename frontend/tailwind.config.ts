@@ -44,11 +44,11 @@ const config: Config = {
           300: "#E8CBA0",
           500: "#D9A567",
           700: "#B87A3D",
-        },
-        coral: {
-          400: "#E8825F",
-          500: "#DE6A43",
-          600: "#C4522E",
+          // Darker than 700 specifically for icon-on-sand-100 use (icon
+          // circles on Transport/Hotel cards, Settings, Telegram): 700 on
+          // 100 measures 2.99:1, just under WCAG's 3:1 minimum for
+          // meaningful (non-decorative) icons. 800 measures 6.05:1.
+          800: "#7A4D23",
         },
       },
       fontFamily: {
