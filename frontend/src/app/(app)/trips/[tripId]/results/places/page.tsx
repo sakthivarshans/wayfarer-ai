@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { PlaceCard } from "@/features/places/PlaceCard";
 import { usePlaces } from "@/features/places/usePlaces";
 import { useMascotNudge } from "@/components/mascot/MascotNudgeContext";
@@ -31,11 +32,7 @@ export default function TripPlacesResultsPage() {
   }
 
   if (error) {
-    return (
-      <Card>
-        <p className="text-sm text-status-danger">{error}</p>
-      </Card>
-    );
+    return <ErrorState message={error} />;
   }
 
   if (places.length === 0) {
