@@ -388,3 +388,19 @@ assuming the palette was fine by eye. Found and fixed one real gap:
   over the photo-card scrim (worst case — a bright/white photo under the
   `ink.900/80` gradient — still measures 6.38:1 / 5.35:1); `ink.900`-on-
   `ink.100` badges (9–14:1).
+
+## Branded error states
+
+Found the last visible old-style gap: every error branch across the app
+(Places/Transport/Hotels tabs, My Trips, the trip-shell "trip not found"
+case, and Itinerary's load failure) was bare red text on a plain `Card`,
+with no icon or visual hierarchy — inconsistent with the icon-circle
+language used everywhere else in the redesign.
+
+`components/ui/ErrorState.tsx`: a `CircleAlert` icon in a
+`status.danger/10` circle next to the message, wrapped in `Card`. Swapped
+into all six full-failure branches. Left as plain inline red text: the two
+`generateError` messages next to the Generate/Regenerate itinerary
+buttons — those are small, contextual to an in-progress action rather
+than a full page failure, so a full icon-card treatment would be
+disproportionate there.
