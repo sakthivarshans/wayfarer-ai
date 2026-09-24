@@ -15,7 +15,7 @@ export function TransportOptionCard({ option }: { option: TransportOption }) {
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sand-100 text-sand-700">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sand-100 text-sand-800">
             <Icon className="h-5 w-5" strokeWidth={2} />
           </div>
           <div>
