@@ -155,18 +155,22 @@ primary interactive color.
 | `sand.300` | `#E8CBA0` | Compass mark secondary facet |
 | `sand.500` | `#D9A567` | Warm accents, mascot pendant cord |
 | `sand.700` | `#B87A3D` | Warm text-on-light accents |
-| `coral.400–600` | `#E8825F` / `#DE6A43` / `#C4522E` | Sparing warm CTA/highlight use — mascot beak, celebratory moments |
+| `sand.800` | `#7A4D23` | Icon foreground on `sand.100` circles — see "Accessibility pass" below; `sand.700` measured under the 3:1 minimum for icons |
 
 `ink` remains the primary brand/interactive color (nav, buttons, links,
-focus states) everywhere in the app shell. `sand`/`coral` are reserved for
+focus states) everywhere in the app shell. `sand` is reserved for
 auth pages, place-card photo scrims, empty-state illustrations, and the
-mascot — i.e. surfaces closer to "marketing" than "dashboard."
+mascot — i.e. surfaces closer to "marketing" than "dashboard." (A
+`coral` family was defined in this same pass for the hand-drawn mascot's
+beak/feet; it was removed once the mascot was replaced by real artwork —
+see "Real logo integration" below — since nothing referenced it anymore.)
 
 **Logo** — `src/components/ui/Logo.tsx`: `LogoMark` (compass needle split
 into four ink/sand facets around a pivot dot, matches `public/favicon.svg`)
 and `Logo` (mark + Fraunces "Wayfarer" wordmark, with a `light` variant for
 photo/dark backgrounds). Used in the sidebar (mark only) today; auth pages
-and any marketing surface should use the full lockup.
+and any marketing surface should use the full lockup. **Superseded** —
+see "Real logo integration" below; both now render the real artwork.
 
 **Photo sourcing (Places tab, itinerary place mentions) — planned, not yet
 built:** Wikipedia's REST API (`/api/rest_v1/page/summary/{title}`),
@@ -175,11 +179,13 @@ Unsplash) specifically because named landmarks get their actual real
 photo rather than a generic keyword match; places without a Wikipedia
 page fall back to an icon/pattern card rather than a mismatched photo.
 
-**Mascot — built.** `components/mascot/Toucan.tsx` (static SVG illustration
-— ink body, coral beak/feet, compass pendant on a sand cord, matching
-`LogoMark`'s facet palette) + `MascotGuide.tsx` (the interactive wrapper).
-Mounted once in `AppShell`, so it's genuinely persistent across client-side
-navigation (its collapsed/expanded React state survives route changes,
+**Mascot — built.** `components/mascot/Toucan.tsx` (originally a static
+SVG illustration — ink body, coral beak/feet, compass pendant on a sand
+cord, matching `LogoMark`'s facet palette; **superseded** by the real
+artwork, see "Real logo integration" below) + `MascotGuide.tsx` (the
+interactive wrapper). Mounted once in `AppShell`, so it's genuinely
+persistent across client-side navigation (its collapsed/expanded React
+state survives route changes,
 since `AppShell` isn't remounted between pages in the `(app)` layout).
 Details:
 - **Idle animation**: `animate-mascot-idle` (custom Tailwind keyframe — a
@@ -358,3 +364,27 @@ style.
 - `TripPlannerForm` reviewed and left as-is: its input styling already
   matches the pattern used on the Telegram form (same `inputClass`), so
   no changes were needed there.
+
+## Accessibility pass — warm palette contrast audit
+
+Per the brief's "accessibility shouldn't regress" constraint, ran a WCAG
+contrast check (relative-luminance formula, not a browser tool) over
+every new color combination introduced across this redesign, rather than
+assuming the palette was fine by eye. Found and fixed one real gap:
+
+- **Icon-on-`sand.100` circles** (Transport/Hotel option cards, Settings,
+  Telegram): `sand.700` foreground measured **2.99:1** against `sand.100`
+  — just under WCAG's 3:1 minimum for meaningful (non-decorative)
+  graphical objects. Added `sand.800` (`#7A4D23`, 6.05:1) and swapped all
+  four usages to it.
+- **`PlacePhoto`'s no-photo fallback card** (`sand.100`→`sand.300`
+  gradient): the place-name label was using `ink.700`, which measures
+  4.96:1 at the `sand.100` end but only **3.79:1** at the `sand.300`
+  end — below the 4.5:1 normal-text minimum wherever the label happens
+  to sit over the darker part of the gradient. Split it: the icon (only
+  needs 3:1) keeps `ink.700`; the label text moved to `text.heading`
+  (11.59:1 at the `sand.300` end, comfortably safe).
+- Checked and passing, no changes needed: white/`sand.100` caption text
+  over the photo-card scrim (worst case — a bright/white photo under the
+  `ink.900/80` gradient — still measures 6.38:1 / 5.35:1); `ink.900`-on-
+  `ink.100` badges (9–14:1).
