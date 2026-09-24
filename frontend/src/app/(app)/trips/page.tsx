@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { TripCard } from "@/features/trips/TripCard";
 import { useTrips } from "@/features/trips/useTrips";
 import { useMascotNudge } from "@/components/mascot/MascotNudgeContext";
@@ -30,9 +31,7 @@ export default function MyTripsPage() {
   if (error) {
     return (
       <div className="pt-2">
-        <Card>
-          <p className="text-sm text-status-danger">{error}</p>
-        </Card>
+        <ErrorState message={error} />
       </div>
     );
   }
