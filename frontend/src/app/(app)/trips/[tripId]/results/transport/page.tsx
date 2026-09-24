@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { TransportOptionCard } from "@/features/transport/TransportOptionCard";
 import { useTransport } from "@/features/transport/useTransport";
 
@@ -26,11 +27,7 @@ export default function TripTransportResultsPage() {
   }
 
   if (error) {
-    return (
-      <Card>
-        <p className="text-sm text-status-danger">{error}</p>
-      </Card>
-    );
+    return <ErrorState message={error} />;
   }
 
   if (!transport) {
