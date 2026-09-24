@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { HotelOptionCard } from "@/features/hotels/HotelOptionCard";
 import { useHotels } from "@/features/hotels/useHotels";
 
@@ -19,11 +20,7 @@ export default function TripHotelsResultsPage() {
   }
 
   if (error) {
-    return (
-      <Card>
-        <p className="text-sm text-status-danger">{error}</p>
-      </Card>
-    );
+    return <ErrorState message={error} />;
   }
 
   if (!hotels) {
