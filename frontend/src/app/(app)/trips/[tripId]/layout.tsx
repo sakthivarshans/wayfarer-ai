@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { CalendarDays, Compass } from "lucide-react";
 import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { TripProvider, useTrip } from "@/features/trips/TripContext";
 import { TRANSPORT_MODE_LABELS } from "@/features/trips/types";
 
@@ -29,9 +30,7 @@ function TripShell({ tripId, children }: { tripId: string; children: ReactNode }
   if (error || !trip) {
     return (
       <div className="pt-2">
-        <Card>
-          <p className="text-sm text-status-danger">{error ?? "Trip not found."}</p>
-        </Card>
+        <ErrorState message={error ?? "Trip not found."} />
       </div>
     );
   }
