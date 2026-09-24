@@ -9,7 +9,7 @@ import { useAuth } from "@/features/auth/AuthContext";
 function SectionHeading({ icon: Icon, title }: { icon: typeof User; title: string }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sand-100 text-sand-700">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sand-100 text-sand-800">
         <Icon className="h-5 w-5" strokeWidth={2} />
       </div>
       <h2 className="font-display text-lg font-medium text-text-heading">{title}</h2>
