@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { PageLoading } from "@/components/ui/PageLoading";
 import { Card } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { useTrips } from "@/features/trips/useTrips";
 
 export default function ItineraryRedirectPage() {
@@ -29,9 +30,7 @@ export default function ItineraryRedirectPage() {
   if (error) {
     return (
       <div className="pt-2">
-        <Card>
-          <p className="text-sm text-status-danger">{error}</p>
-        </Card>
+        <ErrorState message={error} />
       </div>
     );
   }
@@ -39,7 +38,7 @@ export default function ItineraryRedirectPage() {
   return (
     <div className="pt-2">
       <Card>
-        <h2 className="text-base font-semibold text-text-heading">No itinerary yet</h2>
+        <h2 className="font-display text-xl font-medium text-text-heading">No itinerary yet</h2>
         <p className="mt-2 max-w-md text-sm text-text-body">
           Plan a trip first, then a day-by-day itinerary will show up here.
         </p>
