@@ -404,3 +404,13 @@ into all six full-failure branches. Left as plain inline red text: the two
 buttons — those are small, contextual to an in-progress action rather
 than a full page failure, so a full icon-card treatment would be
 disproportionate there.
+
+**Follow-up**: a repo-wide sweep after the pass above caught two more
+instances missed the first time — the top-level `/results` and
+`/itinerary` redirect pages (shown when navigating to those routes with
+no `tripId` in the URL) had the same bare-red-text error and plain h2
+empty-state heading; fixed both to match. Also gave `ErrorState` a `bare`
+prop (skips its own `Card` wrapper) for the one case where it needed to
+nest inside a card that already exists (Telegram's connection-status
+check, inside the "Connect your Telegram bot" card) rather than stacking
+two cards.
