@@ -9,7 +9,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 flex w-[72px] flex-col items-center rounded-br-card bg-ink-900 py-6">
+    <aside className="fixed inset-y-0 left-0 z-20 hidden w-[72px] flex-col items-center rounded-br-card bg-ink-900 py-6 md:flex">
       <Link href="/" aria-label="Wayfarer AI home" className="flex h-11 w-11 items-center justify-center">
         <LogoMark className="h-10 w-10" />
       </Link>
