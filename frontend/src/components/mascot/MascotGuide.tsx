@@ -95,7 +95,7 @@ export function MascotGuide() {
         type="button"
         onClick={() => setCollapsed(false)}
         aria-label="Show Wayfarer guide"
-        className="fixed bottom-4 right-4 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-ink-900 text-white shadow-warm motion-reduce:animate-none"
+        className="fixed bottom-20 right-4 md:bottom-4 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-ink-900 text-white shadow-warm motion-reduce:animate-none"
       >
         <Toucan className="h-7 w-7 animate-mascot-idle motion-reduce:animate-none" />
       </button>
@@ -103,7 +103,7 @@ export function MascotGuide() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-30 flex max-w-[min(280px,calc(100vw-2rem))] flex-col items-end gap-2">
+    <div className="fixed bottom-20 right-4 md:bottom-4 z-30 flex max-w-[min(280px,calc(100vw-2rem))] flex-col items-end gap-2">
       {message && (
         <div className="animate-tip-in rounded-card rounded-br-md bg-white px-4 py-3 text-sm text-text-body shadow-warm">
           <div className="flex items-start justify-between gap-3">
