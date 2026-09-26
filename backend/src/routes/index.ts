@@ -1,12 +1,11 @@
 import { Router } from "express";
-import { healthRouter } from "./health.routes";
-import { telegramRouter } from "./telegram.routes";
-import { tripsRouter } from "./trips.routes";
-import { usersRouter } from "./users.routes";
+import { healthRouter } from "./health.route";
+import { tripsRouter } from "./trips.route";
 
 export const apiRouter = Router();
 
 apiRouter.use("/health", healthRouter);
 apiRouter.use("/trips", tripsRouter);
-apiRouter.use("/telegram", telegramRouter);
-apiRouter.use("/users", usersRouter);
+
+// Future phases will mount additional routers here, e.g.:
+// apiRouter.use("/trips/:id/places", placesRouter);
