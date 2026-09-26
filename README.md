@@ -1,125 +1,100 @@
 # Wayfarer AI
 
-A free, production-ready AI travel assistant. A user enters origin, destination,
-budget, and number of days; the app suggests nearby places, gives quick-compare
-deep links for transport and hotels (redirect-only booking, no in-app payments),
-builds a day-by-day itinerary, and lets the user chat with their own Telegram
-bot about the trip.
+A free, web-based AI travel assistant. Enter an origin, destination, budget,
+and number of days — get nearby places to visit, transport and hotel
+options with "Book" deep links (redirect-only, no in-app payments), a
+generated day-by-day itinerary, and a personal Telegram bot to ask
+follow-up questions about the trip.
 
-This repo was built in phases; see `PHASES.md` for the detailed build
-history and Definition of Done for each one.
+**Current status: Phase 0 + Phase 1 done.**
+- Phase 0: project scaffolding — folder structure, app shell/navigation,
+  health-check route, DB connection, deployment config.
+- Phase 1: the real Trip Planner form (origin, destination, budget, days,
+  transport preference) with client-side validation, wired to a new
+  `POST /api/trips` backend route (zod-validated, saved to MongoDB via a
+  `Trip` model), which redirects to the Results tabs with the new trip's id.
 
-## Features
-
-- **Trip Planner** — origin, destination, budget, days, and a transport
-  mode preference create a trip
-- **Places** — nearby attractions (Geoapify, falling back to OSM
-  Overpass), ranked and trimmed to fit the trip's budget/days
-- **Transport & Hotels** — quick-compare deep links (Google
-  Flights/Maps/Rome2Rio for transport; Booking.com/Google Hotels/
-  Hostelworld for stays) rather than live pricing — see `PHASES.md`
-  Phase 6 for why
-- **Itinerary** — a generated day-by-day plan combining the trip's places,
-  transport, and hotel, regeneratable any time
-- **Telegram bot** — connect your own bot (via BotFather) from `/telegram`
-  and ask it questions about your most recent trip's itinerary anywhere,
-  answered by Groq using that itinerary as context
-
-## Stack
-
-- **Frontend**: Next.js (App Router) + TypeScript + Tailwind CSS — deploy on Vercel
-- **Backend**: Node.js + Express + TypeScript — deploy on Render/Railway
-- **Database**: Firebase Firestore
-- **Auth**: Firebase Authentication (email/password), verified server-side with the Firebase Admin SDK
-- **Places/Routing**: Geoapify (primary), OSM Overpass/Nominatim + OSRM (keyless fallbacks)
-- **LLM**: Groq (Telegram bot replies)
-- **Booking model**: redirect/deep-link only — no payment processing anywhere in this app
+Results (Places/Transport/Hotels), Itinerary, and Telegram Bot Setup are
+still shells/placeholders — those get real data in Phases 2–6.
 
 ## Repo layout
 
 ```
-frontend/   Next.js app
-backend/    Express API
+wayfarer-ai/
+├── frontend/   Next.js 14 (App Router) + TypeScript + Tailwind CSS
+├── backend/    Express + TypeScript + Mongoose
+├── docs/       Deployment notes
+└── vercel.json Root-level Vercel build config (points at /frontend)
 ```
+
+Frontend and backend are two independent npm projects living side by side
+in one repo (no workspace tooling) — each has its own `package.json`,
+`node_modules`, and lockfile, and is deployed as its own service.
+
+## Prerequisites
+
+- Node.js 18+
+- npm 9+
+- A MongoDB Atlas account (free M0 cluster) for the database
 
 ## Running locally
 
-### Prerequisites
-
-- Node.js 20+
-- A Firebase project (Firestore + Authentication enabled) — see `docs/FIREBASE_SETUP.md`
-- API keys for Geoapify and Groq (both free, instant signup, no card required)
-
-### Backend
+### 1. Backend
 
 ```bash
 cd backend
-cp .env.example .env   # fill in real values
+cp .env.example .env
+# Edit .env — at minimum set MONGODB_URI to your Atlas connection string.
 npm install
-npm run dev             # starts on http://localhost:4000
+npm run dev
 ```
 
-Confirm it's up:
+The API starts on `http://localhost:4000`. Confirm it's up:
 
 ```bash
 curl http://localhost:4000/api/health
+# { "status": "ok", "timestamp": "..." }
 ```
 
-### Frontend
+### 2. Frontend
+
+In a second terminal:
 
 ```bash
 cd frontend
-cp .env.example .env.local   # fill in real values
+cp .env.example .env.local
+# Defaults already point at the local backend above; edit if yours runs
+# elsewhere.
 npm install
-npm run dev             # starts on http://localhost:3000
+npm run dev
 ```
+
+The app starts on `http://localhost:3000`.
 
 ## Environment variables
 
-Every required variable is documented with a comment in:
+Every environment variable the whole project will eventually need is
+documented in `backend/.env.example` and `frontend/.env.example`, even
+variables that later phases (Places, Transport, Hotels, Telegram bot)
+introduce. Leave the ones you don't need yet blank — the current code
+doesn't read them.
 
-- `backend/.env.example`
-- `frontend/.env.example`
+**All third-party API keys live only in `backend/.env`.** The frontend
+never holds a secret; its only environment variable is the backend's
+public base URL.
 
-Never commit a real `.env` or `.env.local` file — both are gitignored.
+## Coding standards
 
-## Testing
-
-Both apps have their own automated test suite.
-
-```bash
-cd backend && npm test    # vitest — unit + integration (supertest against the real Express app)
-cd frontend && npm test   # vitest + React Testing Library — apiClient, hooks, components
-```
+- TypeScript strict mode on both apps
+- Feature-based folders, not type-based dumping grounds
+- All external API calls go through a `services/` layer (added as each
+  phase needs one)
+- Every API route validates input with `zod`
+- Errors return a consistent JSON shape (`{ error: { code, message } }`),
+  never a raw stack trace
+- No commented-out dead code
 
 ## Deployment
 
-One-time setup, in order (each depends on the previous step's URL):
-
-1. **Firebase** — follow `docs/FIREBASE_SETUP.md` (one project covers both
-   dev and production).
-2. **Backend → Render.** In the Render dashboard: New → Blueprint → point
-   at this repo (Render reads `backend/render.yaml`). Fill in every env
-   var marked `sync: false` — see `backend/.env.example` for what each
-   one is and where to get it. Once deployed, note the service's public
-   URL (`https://<your-service>.onrender.com`).
-3. **Set `TELEGRAM_WEBHOOK_BASE_URL`** on the backend to that same Render
-   URL (no trailing slash) and redeploy — this is the base the backend
-   builds each user's `/api/telegram/webhook/:userId/:webhookSecret` URL
-   from when they connect a bot from the `/telegram` page.
-4. **Frontend → Vercel.** Import this repo, set the project's root
-   directory to `frontend/`, and add the env vars from
-   `frontend/.env.example` — `NEXT_PUBLIC_API_BASE_URL` should point at
-   the Render URL from step 2 with `/api` appended
-   (`https://<your-service>.onrender.com/api`). Vercel auto-detects
-   Next.js; `vercel.json` just pins the framework explicitly.
-5. **Set `CORS_ORIGIN`** on the backend to the resulting Vercel URL (or a
-   comma-separated list if you also want `localhost:3000` to keep
-   working) and redeploy the backend once more.
-6. Open the deployed frontend, sign up, and connect a Telegram bot from
-   `/telegram` — Telegram will now be able to reach the live webhook.
-
-Free tiers throughout: Render's free web service, Vercel's hobby tier,
-Firebase's Spark plan, and the free tiers of Geoapify/Groq/Telegram — see
-`backend/README.md` and `frontend/README.md` for the per-service
-breakdown.
+See [`docs/DEPLOY.md`](./docs/DEPLOY.md) for step-by-step Vercel (frontend),
+Render (backend), and MongoDB Atlas setup.
