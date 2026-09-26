@@ -21,8 +21,8 @@ export function Topbar() {
   }
 
   return (
-    <header className="flex h-[72px] items-center justify-between px-8">
-      <h1 className="font-display text-2xl font-medium text-text-heading">{title}</h1>
+    <header className="flex h-[72px] items-center justify-between px-4 sm:px-8">
+      <h1 className="truncate font-display text-xl font-medium text-text-heading sm:text-2xl">{title}</h1>
 
       <div className="flex items-center gap-4">
         <button
