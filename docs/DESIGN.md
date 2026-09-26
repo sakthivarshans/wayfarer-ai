@@ -414,3 +414,31 @@ prop (skips its own `Card` wrapper) for the one case where it needed to
 nest inside a card that already exists (Telegram's connection-status
 check, inside the "Connect your Telegram bot" card) rather than stacking
 two cards.
+
+## Mobile navigation (responsive gap fix)
+
+Audited actual mobile-viewport behavior — genuinely unaudited until now —
+and found the app shell had no responsive handling at all: the fixed
+72px-wide left sidebar and its `pl-[72px]` content offset applied at
+every viewport width, which the original PRD's "web only, responsive"
+requirement doesn't allow.
+
+- `Sidebar`: now `hidden md:flex` — desktop-and-up only, unchanged above
+  that breakpoint.
+- `MobileBottomNav.tsx` (new): a fixed bottom tab bar, `md:hidden`, same
+  `navItems` source of truth as the sidebar so the two can't drift apart.
+  Icon + short label per tab, `env(safe-area-inset-bottom, 0px)` padding
+  for iOS home-indicator clearance.
+- `AppShell`: content offset moved to `md:pl-[72px]` (none on mobile);
+  `main` gets `pb-20` on mobile (room for the bottom nav) vs `md:pb-10`;
+  horizontal padding scales `px-4` → `sm:px-8`.
+- `Topbar`: padding and heading size scale down on mobile
+  (`px-4`/`text-xl` → `sm:px-8`/`sm:text-2xl`); heading gets `truncate`
+  so a long page title can't force horizontal scroll on a narrow screen.
+- `MascotGuide`: both fixed elements moved from `bottom-4` to
+  `bottom-20 md:bottom-4`, so the corner guide sits above the new bottom
+  nav on mobile instead of overlapping it, and is unchanged on desktop.
+- Checked and already fine, no changes needed: the Places/My Trips result
+  grids already collapse to a single column below `sm`; the auth-page
+  card and itinerary/results content don't use any fixed widths that
+  would overflow a narrow viewport.
