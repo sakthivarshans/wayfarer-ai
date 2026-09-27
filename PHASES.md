@@ -14,6 +14,7 @@ what's shipped, what's next, and what to verify.
 | 7 | Itinerary generation | ✅ Done |
 | 8 | Telegram bot (connect/webhook/Groq replies) | ✅ Done |
 | 9 | Polish & deployment | ✅ Done |
+| 10 | Restaurants tab (Geoapify + Overpass fallback, mirroring Places) | ✅ Done |
 
 ## Phase 1 — Definition of Done
 
@@ -604,3 +605,51 @@ observability (structured logs already exist via `pino`, but no
 external log aggregation/alerting — reasonable to add only once this
 moves past a student project). Nothing else remains unbuilt against the
 original PRD's redirect-booking, zero-cost scope.
+
+## Phase 10 — Definition of Done
+
+First of the TripAdvisor-style expansion's proposed feature areas
+(Restaurants, Getting Around, Travel Essentials, Local Guides, Admin
+dashboard). Built as a close mirror of Places' existing pattern rather
+than inventing a new one, per that expansion's own guidance.
+
+- **Backend**: `types/restaurant.ts`, a `services/restaurants/` folder
+  (`geoapifyRestaurants.provider.ts`, `overpassRestaurants.provider.ts`,
+  `estimateCost.ts`, `rankRestaurants.ts`) and a `restaurants.service.ts`
+  orchestrator — same Geoapify-primary/Overpass-fallback strategy,
+  Firestore caching (`restaurantResults` collection), and budget-aware
+  ranking (2/day target, capped at 12, vs. Places' 3/day capped at 15) as
+  Places. Reuses the existing `geocode.provider.ts` and `types/place.ts`'s
+  `GeoPoint` rather than duplicating either.
+- **Category mapping**: Geoapify's `catering.*` tree and OSM's
+  `amenity=restaurant|cafe|fast_food|bar|pub|biergarten` /
+  `shop=bakery` map to `restaurant | cafe | fastFood | bar | bakery | other`.
+- **Route**: `GET /api/trips/:id/restaurants`, mounted in
+  `trips.routes.ts` alongside places/transport/hotels — same auth +
+  ownership-check + validation pattern.
+- **Frontend**: `features/restaurants/` (`types.ts`, `api.ts`,
+  `useRestaurants.ts`, `RestaurantCard.tsx`, `RestaurantPhoto.tsx`) and a
+  new `/trips/:tripId/results/restaurants` tab, added to the existing
+  results tab bar. `RestaurantPhoto` reuses Places' `usePlacePhoto` hook
+  directly (it's already generic on the query string) rather than
+  duplicating its Wikipedia-lookup/caching logic for a second entity type.
+- **No Pexels integration** — the TripAdvisor-expansion doc proposed a
+  shared Pexels image service, but the app already has a working,
+  keyless photo source (Wikipedia's search+pageimages API, used by
+  Places). Introducing a second image provider requiring a new API key
+  would be inconsistent with the app's zero-recurring-cost, no-required-key
+  philosophy for a marginal gain — reused the existing approach instead.
+- **No star ratings** — consistent with the expansion doc's guidance,
+  applied here too: category badges + photos only, no rating numbers.
+- [x] `npm run build`, `npm test`, `npm run lint` all clean on **both**
+      apps — backend 159/159 tests (22 net new), frontend 24/24 tests
+      (unchanged; no new frontend tests added, matching the existing
+      convention that `usePlaces`-style hooks don't have dedicated tests
+      while `useItinerary`/`useTelegramConnection`, which have more
+      branching state logic, do).
+
+**To verify locally:** same commands as every prior phase (see Phase 9).
+
+**Deferred (still to come from the expansion doc):** Getting Around
+(local transport within the destination), Travel Essentials (SIM/visa
+info), Local Guides, and the admin dashboard.
