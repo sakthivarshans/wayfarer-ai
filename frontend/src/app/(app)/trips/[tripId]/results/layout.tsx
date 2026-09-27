@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { MapPin, Plane, Hotel } from "lucide-react";
+import { MapPin, Plane, Hotel, UtensilsCrossed } from "lucide-react";
 
 const subTabs = [
   { segment: "places", label: "Places", icon: MapPin },
+  { segment: "restaurants", label: "Restaurants", icon: UtensilsCrossed },
   { segment: "transport", label: "Transport", icon: Plane },
   { segment: "hotels", label: "Hotels", icon: Hotel },
 ];
