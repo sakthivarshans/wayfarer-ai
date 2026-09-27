@@ -22,6 +22,7 @@ Trips (all require `Authorization: Bearer <Firebase ID token>`, and every
 - `GET /api/trips` — list the authenticated user's trips, newest first
 - `GET /api/trips/:id` — fetch one trip
 - `GET /api/trips/:id/places` — ranked nearby places for the trip
+- `GET /api/trips/:id/restaurants` — ranked nearby restaurants/cafes/bars for the trip
 - `GET /api/trips/:id/transport` — transport option summary + deep links
 - `GET /api/trips/:id/hotels` — hotel option summary + deep links
 - `POST /api/trips/:id/itinerary/generate` — (re)generate the day-by-day itinerary
