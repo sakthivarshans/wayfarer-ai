@@ -3,6 +3,7 @@ import { createTrip, getTrip, listTrips } from "../controllers/trips.controller"
 import { getPlacesForTrip } from "../controllers/places.controller";
 import { getRestaurantsForTrip } from "../controllers/restaurants.controller";
 import { getTransportForTrip } from "../controllers/transport.controller";
+import { getGettingAroundForTrip } from "../controllers/gettingAround.controller";
 import { getHotelsForTrip } from "../controllers/hotels.controller";
 import { generateItinerary, getItinerary } from "../controllers/itinerary.controller";
 import { requireAuth } from "../middleware/auth";
@@ -23,6 +24,11 @@ tripsRouter.get(
   getRestaurantsForTrip
 );
 tripsRouter.get("/:id/transport", validate({ params: tripIdParamsSchema }), getTransportForTrip);
+tripsRouter.get(
+  "/:id/getting-around",
+  validate({ params: tripIdParamsSchema }),
+  getGettingAroundForTrip
+);
 tripsRouter.get("/:id/hotels", validate({ params: tripIdParamsSchema }), getHotelsForTrip);
 tripsRouter.post(
   "/:id/itinerary/generate",
