@@ -17,6 +17,9 @@ history and Definition of Done for each one.
   Overpass), ranked and trimmed to fit the trip's budget/days
 - **Restaurants** — nearby restaurants/cafes/bars (same Geoapify-then-Overpass
   approach as Places), ranked and trimmed to fit the trip's budget/days
+- **Getting around** — local transport *within the destination* (distinct from
+  origin → destination Transport): ride apps known to operate in the
+  destination's country plus Google Maps taxi/transit deep links
 - **Transport & Hotels** — quick-compare deep links (Google
   Flights/Maps/Rome2Rio for transport; Booking.com/Google Hotels/
   Hostelworld for stays) rather than live pricing — see `PHASES.md`
