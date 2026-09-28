@@ -15,6 +15,7 @@ what's shipped, what's next, and what to verify.
 | 8 | Telegram bot (connect/webhook/Groq replies) | ✅ Done |
 | 9 | Polish & deployment | ✅ Done |
 | 10 | Restaurants tab (Geoapify + Overpass fallback, mirroring Places) | ✅ Done |
+| 11 | Getting Around (local cab/transit deep links within the destination) | ✅ Done |
 
 ## Phase 1 — Definition of Done
 
@@ -650,6 +651,55 @@ than inventing a new one, per that expansion's own guidance.
 
 **To verify locally:** same commands as every prior phase (see Phase 9).
 
-**Deferred (still to come from the expansion doc):** Getting Around
-(local transport within the destination), Travel Essentials (SIM/visa
-info), Local Guides, and the admin dashboard.
+**Deferred (still to come from the expansion doc):** Travel Essentials
+(SIM/visa info), Local Guides, and the admin dashboard. (Getting Around
+shipped in Phase 11.)
+
+## Phase 11 — Definition of Done
+
+Second feature area from the TripAdvisor-style expansion: **local
+transport within the destination**, a genuinely new feature rather than a
+restyle — the existing Transport tab covers origin → destination
+(*how to get there*); this covers *getting around once you've arrived*.
+
+- **Destination-only by construction.** The deep-link builders in
+  `services/gettingAround/deepLinks.ts` take only the destination string —
+  the origin isn't in their signatures at all — so mixing them up is a
+  compile error rather than a silent bug. A Chennai → Paris trip can only
+  ever produce Paris links.
+- **Cabs**: `services/gettingAround/rideProviders.ts` is a curated static
+  table of ride-hailing coverage by country (Uber, Ola, Bolt, Grab) — there
+  is no free live API for this, so it's a conservative best-effort list and
+  the UI says "check the app for current coverage." A Google Maps taxi
+  search is *always* included as a working fallback, so a country outside
+  the table (or a failed lookup) still gets a usable option.
+- **Transit**: Google Maps transit directions with the destination set and
+  no fixed origin (Maps starts from the traveler's current location), plus
+  a "nearby stops & stations" search.
+- **Country lookup**: one Nominatim call (`addressdetails=1`, the same
+  keyless service geocoding already uses) resolves the destination's ISO
+  country code. Failures are non-fatal and deliberately *not cached*, so a
+  transient outage isn't remembered as "no ride apps here." Successful
+  results are cached per trip in Firestore (`gettingAroundResults`), and a
+  cached entry scoped to a different destination is ignored.
+- **Route**: `GET /api/trips/:id/getting-around` — same auth +
+  ownership + validation pattern as every other trip sub-route.
+- **Frontend**: `features/gettingAround/` and a new
+  `/trips/:tripId/results/getting-around` tab. Five tabs no longer fit on
+  narrow screens, so the tab bar now scrolls horizontally instead of
+  clipping.
+- **Regression tests** (the expansion doc's explicit requirement): unit
+  tests on the link builders (no link or label mentions the origin, even
+  when the origin's country's ride app — Ola — would otherwise be tempting),
+  service tests (country lookup is called with the destination and *never*
+  the origin; swapping origin/destination swaps the results), and a route
+  test asserting the whole JSON response for a Chennai → Paris trip never
+  contains "chennai". Verified they actually bite: temporarily switching
+  the service to use `trip.origin` made 3 of them fail.
+- [x] `npm run build`, `npm test`, `npm run lint` clean on **both** apps —
+      backend 186/186 (27 net new), frontend 26/26 (2 net new).
+
+**To verify locally:** same commands as every prior phase (see Phase 9).
+
+**Deferred:** Travel Essentials (SIM/visa info), Local Guides, admin
+dashboard.
