@@ -16,6 +16,7 @@ what's shipped, what's next, and what to verify.
 | 9 | Polish & deployment | ✅ Done |
 | 10 | Restaurants tab (Geoapify + Overpass fallback, mirroring Places) | ✅ Done |
 | 11 | Getting Around (local cab/transit deep links within the destination) | ✅ Done |
+| 12 | Travel Essentials (visa requirements + SIM/eSIM, grounded AI summaries) | ✅ Done |
 
 ## Phase 1 — Definition of Done
 
@@ -701,5 +702,80 @@ restyle — the existing Transport tab covers origin → destination
 
 **To verify locally:** same commands as every prior phase (see Phase 9).
 
-**Deferred:** Travel Essentials (SIM/visa info), Local Guides, admin
-dashboard.
+**Deferred:** Travel Essentials shipped in Phase 12. Local Guides and the
+admin dashboard remain.
+
+## Phase 12 — Definition of Done
+
+Third feature area from the TripAdvisor-style expansion: visa requirements
+and SIM/eSIM info per destination — explicitly scoped by that doc as
+**general guidance, not authoritative legal advice**.
+
+- **Visa dataset.** Checked three free open datasets before picking one (the
+  doc's explicit instruction, not assumed): `ilyankou/passport-index-dataset`
+  (MIT, last pushed Feb 2026, ~once/month) and `imorte/passport-index-data`
+  (MIT, single initial-release commit, no refresh history) are maintained but
+  slower-moving; `xpressmike/visa-matrix` (CC BY-SA 4.0) has weekly automated
+  refreshes plus manual corrections (e.g. a Thailand e-visa change caught in
+  August 2026) and — uniquely — ships a per-row `confidence` field
+  (`high`/`medium`/`disputed`) when its underlying sources disagree, which
+  the UI surfaces directly rather than silently picking a side. Picked it for
+  the freshness and the honesty about uncertainty.
+- **Vendored, not fetched live.** `backend/data/visa/` holds unmodified
+  copies of the dataset's tidy CSV and country list, pinned to a specific
+  commit, with `NOTICE.md` (license, attribution, scope, update procedure)
+  and `metadata.json` (source, commit, retrievedAt) alongside them. Rows
+  with a status or confidence value the app doesn't recognise are dropped
+  at parse time rather than guessed at.
+- **Deterministic headline, AI-assisted summary.** Every response includes a
+  `headline` computed directly from the dataset (e.g. "Visa-free for up to
+  90 days") that's always correct and never touches the model. A separate
+  `summary` is AI-rephrased for warmth — but the prompt in
+  `travelSummaryAi.ts` passes *only* the structured facts (status, days,
+  confidence) and explicitly forbids inventing fees, processing times, or
+  documents, since the dataset doesn't contain them and a hallucinated fee
+  on a visa page could genuinely hurt someone. `summarySource` tells the UI
+  whether it got the AI version or the template fallback, and the
+  deterministic template (`visaSummary.ts`) is what's shown whenever Groq is
+  unavailable — tested by rejecting the mocked call and asserting the
+  response still succeeds.
+- **Passport is a guess, labelled as one.** There's no "who are you" signal
+  to use, so the passport country defaults to the trip's **origin**'s
+  country (looked up the same way Getting Around resolves a destination) and
+  the response marks it `source: "origin"`. A `?passport=XX` override lets
+  the frontend's picker ask about a different passport entirely —
+  `source: "selected"` — without ever touching the origin lookup.
+- **SIM/eSIM**: redirect-only links to Airalo and Holafly, matching every
+  other provider in this app. Verified both marketplaces' actual URL
+  patterns (`airalo.com/{name}-esim`, `esim.holafly.com/esim-{name}/`)
+  rather than assuming; checked all 199 dataset countries programmatically
+  and found 8 with punctuation/"and" in the name plus several Airalo/dataset
+  naming mismatches (e.g. "Czech Republic" vs. Airalo's "czechia"), which
+  are explicitly aliased. Anything not confidently mappable — and every
+  multi-word name for Holafly, whose multi-word pattern was never
+  confirmed — falls back to the provider's general store/home page rather
+  than risking a 404. No affiliate IDs are wired in yet (none provided);
+  the doc's placeholder note about where one would slot in applies here too.
+- **Caching**: AI summaries are cached in Firestore per passport+destination
+  (visa) or per destination (connectivity) — shared across trips, not
+  per-trip, since the underlying facts don't depend on which trip asked —
+  with a 30-day TTL and automatic invalidation if the vendored dataset's
+  commit changes. A cache read/write failure degrades to "just call the
+  model again," never to an error.
+- **Route**: `GET /api/trips/:id/travel-essentials` (optional
+  `?passport=XX`, validated as a 2-letter code and checked against the
+  dataset) — same auth/ownership pattern as every other trip sub-route.
+- **Frontend**: `features/travelEssentials/` and a new
+  `/trips/:tripId/results/travel-essentials` ("Essentials") tab, with a
+  passport picker covering all 199 dataset countries.
+- [x] `npm run build`, `npm test`, `npm run lint` clean on **both** apps —
+      backend 259/259 (73 net new, incl. a dataset-wide eSIM-URL-shape test
+      and a prompt test asserting the system message forbids inventing
+      fees/processing times/documents), frontend 35/35 (9 net new).
+      Mutation-tested the origin-vs-destination passport derivation the same
+      way as Phase 11's regression suite: swapping `originCode` for
+      `destinationCode` in the service broke 10 tests.
+
+**To verify locally:** same commands as every prior phase (see Phase 9).
+
+**Deferred:** Local Guides, admin dashboard.
