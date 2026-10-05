@@ -17,10 +17,11 @@ for the full project overview and `.env.example` for required configuration.
 - `/` — Trip Planner (Home) — protected; creates a trip, then goes to `/trips/:id`
 - `/trips` — My Trips — lists every trip you've planned
 - `/trips/:tripId` — redirects to that trip's Results tab
-- `/trips/:tripId/results/{places,restaurants,transport,hotels,getting-around}` — protected,
-  tabbed results scoped to one trip: ranked nearby places and restaurants,
-  quick-compare deep links for transport and hotels, and local cab/transit
-  links for getting around the destination
+- `/trips/:tripId/results/{places,restaurants,transport,hotels,getting-around,travel-essentials}` —
+  protected, tabbed results scoped to one trip: ranked nearby places and
+  restaurants, quick-compare deep links for transport and hotels, local
+  cab/transit links for getting around the destination, and visa/SIM
+  essentials
 - `/trips/:tripId/itinerary` — generate/regenerate and view the trip's
   day-by-day itinerary
 - `/results`, `/itinerary` — convenience redirects to your most recent
