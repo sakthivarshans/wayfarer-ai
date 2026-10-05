@@ -1,0 +1,8 @@
+{
+  "source": "https://github.com/xpressmike/visa-matrix",
+  "commit": "33cf6adec69e108496e72039dc6b29e13f2f3962",
+  "retrievedAt": "2026-09-28",
+  "license": "CC-BY-SA-4.0",
+  "files": ["visa-matrix-tidy.csv", "countries-iso2.json"],
+  "modified": false
+}
