@@ -4,11 +4,13 @@ import { getPlacesForTrip } from "../controllers/places.controller";
 import { getRestaurantsForTrip } from "../controllers/restaurants.controller";
 import { getTransportForTrip } from "../controllers/transport.controller";
 import { getGettingAroundForTrip } from "../controllers/gettingAround.controller";
+import { getTravelEssentialsForTrip } from "../controllers/travelEssentials.controller";
 import { getHotelsForTrip } from "../controllers/hotels.controller";
 import { generateItinerary, getItinerary } from "../controllers/itinerary.controller";
 import { requireAuth } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import { createTripBodySchema, tripIdParamsSchema } from "../schemas/trip.schemas";
+import { travelEssentialsQuerySchema } from "../schemas/travelEssentials.schemas";
 
 export const tripsRouter = Router();
 
@@ -28,6 +30,11 @@ tripsRouter.get(
   "/:id/getting-around",
   validate({ params: tripIdParamsSchema }),
   getGettingAroundForTrip
+);
+tripsRouter.get(
+  "/:id/travel-essentials",
+  validate({ params: tripIdParamsSchema, query: travelEssentialsQuerySchema }),
+  getTravelEssentialsForTrip
 );
 tripsRouter.get("/:id/hotels", validate({ params: tripIdParamsSchema }), getHotelsForTrip);
 tripsRouter.post(
