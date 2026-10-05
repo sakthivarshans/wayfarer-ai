@@ -20,6 +20,10 @@ history and Definition of Done for each one.
 - **Getting around** — local transport *within the destination* (distinct from
   origin → destination Transport): ride apps known to operate in the
   destination's country plus Google Maps taxi/transit deep links
+- **Travel essentials** — visa requirements (from a vendored open dataset,
+  with an AI-written plain-language summary grounded strictly in that
+  data) and SIM/eSIM options (Airalo, Holafly), labelled as general
+  guidance with links to verify officially
 - **Transport & Hotels** — quick-compare deep links (Google
   Flights/Maps/Rome2Rio for transport; Booking.com/Google Hotels/
   Hostelworld for stays) rather than live pricing — see `PHASES.md`
