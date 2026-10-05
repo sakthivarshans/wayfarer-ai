@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Car, MapPin, Plane, Hotel, UtensilsCrossed } from "lucide-react";
+import { Car, MapPin, Plane, Hotel, UtensilsCrossed, Luggage } from "lucide-react";
 
 const subTabs = [
   { segment: "places", label: "Places", icon: MapPin },
@@ -11,6 +11,7 @@ const subTabs = [
   { segment: "transport", label: "Transport", icon: Plane },
   { segment: "hotels", label: "Hotels", icon: Hotel },
   { segment: "getting-around", label: "Getting around", icon: Car },
+  { segment: "travel-essentials", label: "Essentials", icon: Luggage },
 ];
 
 export default function TripResultsLayout({ children }: { children: ReactNode }) {
