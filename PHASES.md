@@ -17,6 +17,7 @@ what's shipped, what's next, and what to verify.
 | 10 | Restaurants tab (Geoapify + Overpass fallback, mirroring Places) | ✅ Done |
 | 11 | Getting Around (local cab/transit deep links within the destination) | ✅ Done |
 | 12 | Travel Essentials (visa requirements + SIM/eSIM, grounded AI summaries) | ✅ Done |
+| 13 | Admin dashboard (ADMIN_EMAILS allowlist, analytics, Local Guide CRUD) | ✅ Done |
 
 ## Phase 1 — Definition of Done
 
@@ -778,4 +779,59 @@ and SIM/eSIM info per destination — explicitly scoped by that doc as
 
 **To verify locally:** same commands as every prior phase (see Phase 9).
 
-**Deferred:** Local Guides, admin dashboard.
+**Deferred:** Local Guides (now unblocked — the admin CRUD it reads from shipped in Phase 13).
+
+## Phase 13 — Definition of Done
+
+Admin dashboard: the one piece of the TripAdvisor-style expansion flagged
+as closest to "new infrastructure" rather than "new feature on existing
+infrastructure" — building it needed an actual notion of "admin," which
+didn't exist before.
+
+- **Auth decision**: `ADMIN_EMAILS`, a comma-separated env var checked
+  against the signed-in user's email — the expansion doc's own proposed
+  approach, picked over a new roles system since nothing here needs more
+  than that. **Unset means nobody is an admin**, not everybody; this is
+  tested directly, and mutation-tested the same way as the Getting
+  Around/Travel Essentials regressions — inverting the allowlist check
+  broke 6 of 9 tests.
+- **Two-tier access.** `GET /api/admin/session` sits behind `requireAuth`
+  only and returns `{ isAdmin: boolean }` — this is how the frontend asks
+  "should I show the Admin link?" without a 403 on every page load for
+  everyone else. Every *other* `/api/admin/*` route sits behind
+  `requireAuth` **and** `requireAdmin`, verified with a parameterized
+  integration test across all 5 of them (403 for a signed-in non-admin,
+  401 with no token) rather than testing one route and assuming the
+  pattern holds for the rest.
+- **Analytics**: total users (via Firebase Auth's own `listUsers()`,
+  paginated — there's no per-user Firestore profile doc to count instead),
+  total trips, and top 10 destinations by trip count (case-insensitive
+  merge, e.g. "Paris"/"paris" counted together, keeping the first-seen
+  casing for display). Same full-collection-scan trade-off
+  `trips.service.ts` already makes — fine at this scale, avoids a
+  composite index.
+- **Local Guides CRUD**: `localGuides` Firestore collection, create/list/
+  update/delete. **`photoUrl` is admin-supplied only, never
+  auto-fetched** — reusing Places/Restaurants' Wikipedia-name-lookup trick
+  for a real person's profile would risk showing them a photo of an
+  unrelated namesake, a meaningfully worse failure than just showing no
+  photo.
+- **Frontend**: `features/admin/`, a client-gated `/admin` page (explicit
+  comment that this is a UI convenience, not the real boundary — every API
+  call re-checks server-side regardless), and a conditional "Admin
+  dashboard" link in Settings via `useAdminSession`, which **fails closed**
+  (`isAdmin: false`) on any error or missing token rather than risking a
+  false positive — tested directly.
+- **Shared test infra extended, not replaced**: `tests/helpers/fakeFirestore.ts`
+  gained `collection().get()` (list-all), `merge` support in `.set()`, and
+  `.doc().delete()` — all additive; ran the full existing suite
+  immediately after to confirm nothing else broke before building on top
+  of it.
+- [x] `npm run build`, `npm test`, `npm run lint` clean on **both** apps —
+      backend 299/299 (40 net new), frontend 57/57 (22 net new).
+
+**To verify locally:** same commands as every prior phase (see Phase 9).
+To see the dashboard yourself, add your own email to `ADMIN_EMAILS` in
+`backend/.env`.
+
+**Deferred:** Local Guides (now unblocked — the admin CRUD it reads from shipped here).
