@@ -24,6 +24,12 @@ const envSchema = z
     TELEGRAM_WEBHOOK_BASE_URL: z.string().optional(),
     TOKEN_ENCRYPTION_KEY: z.string().optional(),
 
+    // Comma-separated allowlist for the admin dashboard (Phase 13). No new
+    // roles system — the simplest fit for this project's zero-infra
+    // approach, matching the TripAdvisor-expansion doc's own proposal.
+    // Unset means nobody is an admin, not "everybody is."
+    ADMIN_EMAILS: z.string().optional(),
+
     // Optional: defaults to OSRM's public demo server (see
     // services/transport/osrmRoute.provider.ts) when unset. Point this at a
     // self-hosted OSRM instance if the public demo server's fair-use limits
@@ -64,4 +70,8 @@ export const env = {
   ...parsed.data,
   corsOrigins: parsed.data.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
   isProduction: parsed.data.NODE_ENV === "production",
+  adminEmails: (parsed.data.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
 };
