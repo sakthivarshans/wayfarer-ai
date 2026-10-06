@@ -33,6 +33,13 @@ export function createFakeFirestore(): Firestore {
           docsFor(name).push({ id, data });
           return { id };
         },
+        // Lists every doc in the collection — used by services that scan a
+        // whole (small, student-project-scale) collection, e.g. admin
+        // analytics and listing all local guides.
+        get: async () => {
+          const docs = docsFor(name).map((d) => ({ id: d.id, data: () => d.data }));
+          return { docs };
+        },
         doc: (id: string) => ({
           get: async () => {
             const found = docsFor(name).find((d) => d.id === id);
@@ -42,13 +49,20 @@ export function createFakeFirestore(): Firestore {
               data: () => found?.data,
             };
           },
-          set: async (data: Record<string, unknown>) => {
+          set: async (data: Record<string, unknown>, options?: { merge?: boolean }) => {
             const docs = docsFor(name);
             const existing = docs.find((d) => d.id === id);
             if (existing) {
-              existing.data = data;
+              existing.data = options?.merge ? { ...existing.data, ...data } : data;
             } else {
               docs.push({ id, data });
+            }
+          },
+          delete: async () => {
+            const docs = docsFor(name);
+            const index = docs.findIndex((d) => d.id === id);
+            if (index !== -1) {
+              docs.splice(index, 1);
             }
           },
         }),
