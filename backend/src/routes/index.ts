@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { adminRouter } from "./admin.routes";
 import { healthRouter } from "./health.routes";
 import { telegramRouter } from "./telegram.routes";
 import { tripsRouter } from "./trips.routes";
@@ -10,3 +11,4 @@ apiRouter.use("/health", healthRouter);
 apiRouter.use("/trips", tripsRouter);
 apiRouter.use("/telegram", telegramRouter);
 apiRouter.use("/users", usersRouter);
+apiRouter.use("/admin", adminRouter);
