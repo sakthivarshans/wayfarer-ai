@@ -25,6 +25,9 @@ Trips (all require `Authorization: Bearer <Firebase ID token>`, and every
 - `GET /api/trips/:id/restaurants` — ranked nearby restaurants/cafes/bars for the trip
 - `GET /api/trips/:id/getting-around` — local cab/transit deep links scoped to the trip's destination
 - `GET /api/trips/:id/travel-essentials` — visa requirements and SIM/eSIM options for the trip's destination (optional `?passport=XX` override)
+- `GET /api/admin/session` — `{ isAdmin: boolean }` for the signed-in user (auth required, admin not required)
+- `GET /api/admin/analytics` — user/trip counts and top destinations (admin only)
+- `GET/POST /api/admin/local-guides`, `PATCH/DELETE /api/admin/local-guides/:guideId` — curated Local Guide CRUD (admin only)
 - `GET /api/trips/:id/transport` — transport option summary + deep links
 - `GET /api/trips/:id/hotels` — hotel option summary + deep links
 - `POST /api/trips/:id/itinerary/generate` — (re)generate the day-by-day itinerary
