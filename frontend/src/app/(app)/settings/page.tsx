@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, Send, User } from "lucide-react";
+import { LogOut, Send, Shield, User } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { useAuth } from "@/features/auth/AuthContext";
+import { useAdminSession } from "@/features/admin/useAdminSession";
 
 function SectionHeading({ icon: Icon, title }: { icon: typeof User; title: string }) {
   return (
@@ -20,6 +21,7 @@ function SectionHeading({ icon: Icon, title }: { icon: typeof User; title: strin
 export default function SettingsPage() {
   const { user, signOutUser } = useAuth();
   const router = useRouter();
+  const { isAdmin } = useAdminSession();
 
   async function handleSignOut() {
     await signOutUser();
@@ -55,6 +57,19 @@ export default function SettingsPage() {
           Manage Telegram bot →
         </Link>
       </Card>
+
+      {isAdmin && (
+        <Card className="max-w-md">
+          <SectionHeading icon={Shield} title="Admin" />
+          <p className="mt-4 text-sm text-text-body">Manage local guide listings and view app-wide analytics.</p>
+          <Link
+            href="/admin"
+            className="mt-4 inline-block rounded-full border border-surface-border px-4 py-2 text-sm font-medium text-text-body transition-colors hover:border-ink-700 hover:text-ink-700"
+          >
+            Open admin dashboard →
+          </Link>
+        </Card>
+      )}
     </div>
   );
 }
