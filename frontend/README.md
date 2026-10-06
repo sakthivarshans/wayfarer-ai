@@ -22,6 +22,10 @@ for the full project overview and `.env.example` for required configuration.
   restaurants, quick-compare deep links for transport and hotels, local
   cab/transit links for getting around the destination, and visa/SIM
   essentials
+- `/admin` — protected, client-gated on `useAdminSession()` (every
+  `/api/admin/*` call independently re-checks server-side); analytics and
+  Local Guide CRUD. Linked from Settings only when the signed-in user is
+  an admin.
 - `/trips/:tripId/itinerary` — generate/regenerate and view the trip's
   day-by-day itinerary
 - `/results`, `/itinerary` — convenience redirects to your most recent
