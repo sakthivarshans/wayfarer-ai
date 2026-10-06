@@ -24,6 +24,10 @@ history and Definition of Done for each one.
   with an AI-written plain-language summary grounded strictly in that
   data) and SIM/eSIM options (Airalo, Holafly), labelled as general
   guidance with links to verify officially
+- **Admin dashboard** (`/admin`, allowlisted via `ADMIN_EMAILS`) — basic
+  analytics (users, trips, most-planned destinations) and CRUD for Local
+  Guide profile cards, the curated content the upcoming Local Guides tab
+  will read from
 - **Transport & Hotels** — quick-compare deep links (Google
   Flights/Maps/Rome2Rio for transport; Booking.com/Google Hotels/
   Hostelworld for stays) rather than live pricing — see `PHASES.md`
