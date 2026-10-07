@@ -18,6 +18,7 @@ what's shipped, what's next, and what to verify.
 | 11 | Getting Around (local cab/transit deep links within the destination) | ✅ Done |
 | 12 | Travel Essentials (visa requirements + SIM/eSIM, grounded AI summaries) | ✅ Done |
 | 13 | Admin dashboard (ADMIN_EMAILS allowlist, analytics, Local Guide CRUD) | ✅ Done |
+| 14 | Local Guides tab (public read of admin-curated guide cards) | ✅ Done |
 
 ## Phase 1 — Definition of Done
 
@@ -779,7 +780,11 @@ and SIM/eSIM info per destination — explicitly scoped by that doc as
 
 **To verify locally:** same commands as every prior phase (see Phase 9).
 
-**Deferred:** Local Guides (now unblocked — the admin CRUD it reads from shipped in Phase 13).
+**Deferred:** none — this was the last of the six feature areas from the
+TripAdvisor-style expansion doc (Restaurants, Getting Around, Travel
+Essentials, Pexels [skipped — see Phase 10], admin dashboard, Local
+Guides). The one explicit gap *outside* that doc's scope is user
+reviews/ratings, which the doc deliberately left out as its own product.
 
 ## Phase 13 — Definition of Done
 
@@ -835,3 +840,44 @@ To see the dashboard yourself, add your own email to `ADMIN_EMAILS` in
 `backend/.env`.
 
 **Deferred:** Local Guides (now unblocked — the admin CRUD it reads from shipped here).
+
+## Phase 14 — Definition of Done
+
+Local Guides — the last of the six feature areas from the TripAdvisor-style
+expansion doc. Unblocked by Phase 13: this is a thin, public-read layer on
+top of the admin-curated `localGuides` collection, not a new data source.
+
+- **No external API, no deep-link guessing.** Unlike every other
+  redirect-based feature in this app (Restaurants, Hotels, Getting Around,
+  Travel Essentials' eSIM links), a guide's `profileUrl` is entered
+  directly by the admin when the card is created — there's no provider
+  URL pattern to verify or alias, since the admin is pasting the guide's
+  actual ToursByLocals/Viator/Airbnb Experiences page.
+- **Destination matching is deliberately loose.** Both the trip's
+  destination and the guide's destination are free text entered by
+  different people at different times — "Marrakech" (admin) has to match
+  a trip to "Marrakech, Morocco" (user), and vice versa. Case-insensitive
+  mutual substring containment, tested directly for both directions plus
+  the "doesn't match unrelated destinations" and "doesn't match on empty
+  strings" cases.
+- **No caching layer**, unlike Places/Restaurants/Getting
+  Around/Travel Essentials — there's no external API response to cache
+  here, just a direct read of a small, admin-managed Firestore collection.
+  Adding a cache would be complexity with no problem to solve.
+- **Photos stay admin-only**, as decided in Phase 13: no Wikipedia-name-
+  lookup reuse for a real person's profile. When `photoUrl` is unset, the
+  card shows initials from the guide's name instead of a generic icon —
+  tested for both a two-word name and a single-word edge case.
+- Empty state (no guides curated yet for a destination) points the
+  traveller to the established platforms directly, rather than a bare "no
+  results."
+- [x] `npm run build`, `npm test`, `npm run lint` clean on **both** apps —
+      backend 313/313 (14 net new), frontend 63/63 (6 net new).
+
+**To verify locally:** same commands as every prior phase (see Phase 9).
+To see a guide card, add one via `/admin` for a destination you then
+create a trip to.
+
+**This closes out the TripAdvisor-style expansion doc's explicit scope.**
+Remaining ideas are outside what that doc asked for — most notably user
+reviews/ratings, which it deliberately left out as a separate product.
