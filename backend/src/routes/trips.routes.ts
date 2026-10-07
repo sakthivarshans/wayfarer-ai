@@ -5,6 +5,7 @@ import { getRestaurantsForTrip } from "../controllers/restaurants.controller";
 import { getTransportForTrip } from "../controllers/transport.controller";
 import { getGettingAroundForTrip } from "../controllers/gettingAround.controller";
 import { getTravelEssentialsForTrip } from "../controllers/travelEssentials.controller";
+import { getLocalGuidesForTrip } from "../controllers/localGuides.controller";
 import { getHotelsForTrip } from "../controllers/hotels.controller";
 import { generateItinerary, getItinerary } from "../controllers/itinerary.controller";
 import { requireAuth } from "../middleware/auth";
@@ -35,6 +36,11 @@ tripsRouter.get(
   "/:id/travel-essentials",
   validate({ params: tripIdParamsSchema, query: travelEssentialsQuerySchema }),
   getTravelEssentialsForTrip
+);
+tripsRouter.get(
+  "/:id/local-guides",
+  validate({ params: tripIdParamsSchema }),
+  getLocalGuidesForTrip
 );
 tripsRouter.get("/:id/hotels", validate({ params: tripIdParamsSchema }), getHotelsForTrip);
 tripsRouter.post(
