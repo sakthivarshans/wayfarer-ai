@@ -26,8 +26,12 @@ history and Definition of Done for each one.
   guidance with links to verify officially
 - **Admin dashboard** (`/admin`, allowlisted via `ADMIN_EMAILS`) — basic
   analytics (users, trips, most-planned destinations) and CRUD for Local
-  Guide profile cards, the curated content the upcoming Local Guides tab
-  will read from
+  Guide profile cards
+- **Local guides** — admin-curated profile cards (photo or initials, name,
+  languages, specialty, bio) for a trip's destination, each linking out to
+  the guide's real profile on an established platform (ToursByLocals,
+  Viator, Airbnb Experiences). Not a marketplace — no messaging, no
+  availability, no in-house guide accounts
 - **Transport & Hotels** — quick-compare deep links (Google
   Flights/Maps/Rome2Rio for transport; Booking.com/Google Hotels/
   Hostelworld for stays) rather than live pricing — see `PHASES.md`
