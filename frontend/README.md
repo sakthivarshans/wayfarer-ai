@@ -17,11 +17,11 @@ for the full project overview and `.env.example` for required configuration.
 - `/` — Trip Planner (Home) — protected; creates a trip, then goes to `/trips/:id`
 - `/trips` — My Trips — lists every trip you've planned
 - `/trips/:tripId` — redirects to that trip's Results tab
-- `/trips/:tripId/results/{places,restaurants,transport,hotels,getting-around,travel-essentials}` —
+- `/trips/:tripId/results/{places,restaurants,transport,hotels,getting-around,travel-essentials,local-guides}` —
   protected, tabbed results scoped to one trip: ranked nearby places and
   restaurants, quick-compare deep links for transport and hotels, local
-  cab/transit links for getting around the destination, and visa/SIM
-  essentials
+  cab/transit links for getting around the destination, visa/SIM
+  essentials, and curated local guide profiles
 - `/admin` — protected, client-gated on `useAdminSession()` (every
   `/api/admin/*` call independently re-checks server-side); analytics and
   Local Guide CRUD. Linked from Settings only when the signed-in user is
